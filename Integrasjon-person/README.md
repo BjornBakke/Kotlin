@@ -13,6 +13,14 @@ Spring Boot-applikasjon for personsøk.
 mvn spring-boot:run
 ```
 
+### Stoppe applikasjonen
+
+| Terminal | Forgrunn | Bakgrunn (`&`) |
+|---|---|---|
+| **PowerShell** | `Ctrl+C` | `Stop-Job 1` og `Remove-Job 1` |
+| **Git Bash** | `Ctrl+C` | `kill %1` |
+| **CMD** | `Ctrl+C` | `taskkill /F /PID <pid>` |
+
 ## Teste API-et
 
 Når applikasjonen kjører, åpne nettleseren eller bruk curl:
