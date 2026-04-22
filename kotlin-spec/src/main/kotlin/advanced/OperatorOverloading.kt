@@ -1,75 +1,78 @@
 package org.example.advanced
 
-// operator fun — overload operatorer for egne typer
+/**
+ * OperatorOverloading — overstyr operatorer for egne typer
+ *
+ * Dekker:
+ *  - plus, minus, times, unaryMinus
+ *  - compareTo (gjør <, >, <=, >= tilgjengelig)
+ *  - get, set (indexing: obj[i, j])
+ *  - contains (gjør 'in' tilgjengelig)
+ *
+ * Bruk når: operasjonene på typen er matematiske eller samling-lignende
+ * og leses klarere med operator enn med metodenavn.
+ *
+ * NB: Ikke misbruk. "a + b" bør faktisk føles som addisjon — ellers er
+ *     en vanlig metode tydeligere.
+ *
+ * Docs: https://kotlinlang.org/docs/operator-overloading.html
+ */
 
-data class Vector(val x: Double, val y: Double) {
-    // + operator
-    operator fun plus(other: Vector) = Vector(x + other.x, y + other.y)
+data class Vektor(val x: Double, val y: Double) {
+    operator fun plus(annen: Vektor) = Vektor(x + annen.x, y + annen.y)
+    operator fun minus(annen: Vektor) = Vektor(x - annen.x, y - annen.y)
+    operator fun times(skalar: Double) = Vektor(x * skalar, y * skalar)
+    operator fun unaryMinus() = Vektor(-x, -y)
 
-    // - operator
-    operator fun minus(other: Vector) = Vector(x - other.x, y - other.y)
+    // compareTo gir deg <, >, <=, >= for fri
+    operator fun compareTo(annen: Vektor): Int =
+        magnitude.compareTo(annen.magnitude)
 
-    // * operator (skalar)
-    operator fun times(scalar: Double) = Vector(x * scalar, y * scalar)
-
-    // Unary minus
-    operator fun unaryMinus() = Vector(-x, -y)
-
-    // compareTo — lar deg bruke <, >, <=, >=
-    operator fun compareTo(other: Vector): Int {
-        val thisMag = Math.sqrt(x * x + y * y)
-        val otherMag = Math.sqrt(other.x * other.x + other.y * other.y)
-        return thisMag.compareTo(otherMag)
-    }
-
-    val magnitude: Double get() = Math.sqrt(x * x + y * y)
+    val magnitude: Double
+        get() = kotlin.math.sqrt(x * x + y * y)
 }
 
-// Indexering med get/set
-class Matrix(private val rows: Int, private val cols: Int) {
-    private val data = Array(rows) { DoubleArray(cols) }
+// get/set — indexering
+class Matrise(private val rader: Int, private val kolonner: Int) {
+    private val data = Array(rader) { DoubleArray(kolonner) }
 
-    operator fun get(row: Int, col: Int) = data[row][col]
-    operator fun set(row: Int, col: Int, value: Double) { data[row][col] = value }
+    operator fun get(rad: Int, kol: Int) = data[rad][kol]
+    operator fun set(rad: Int, kol: Int, verdi: Double) { data[rad][kol] = verdi }
 
-    override fun toString(): String = data.joinToString("\n") { row ->
-        row.joinToString(", ") { "%.1f".format(it) }
+    override fun toString(): String = data.joinToString("\n") { rad ->
+        rad.joinToString(", ") { "%.1f".format(it) }
     }
 }
 
-// contains — lar deg bruke 'in' operator
-data class BoundingBox(val minX: Double, val minY: Double, val maxX: Double, val maxY: Double) {
-    operator fun contains(point: Vector) =
-        point.x in minX..maxX && point.y in minY..maxY
+// contains — 'in' operator
+data class Rektangel(val minX: Double, val minY: Double, val maxX: Double, val maxY: Double) {
+    operator fun contains(p: Vektor) = p.x in minX..maxX && p.y in minY..maxY
 }
 
 fun main() {
-    val a = Vector(1.0, 2.0)
-    val b = Vector(3.0, 4.0)
+    val a = Vektor(1.0, 2.0)
+    val b = Vektor(3.0, 4.0)
 
-    println("a + b = ${a + b}")      // Vector(4.0, 6.0)
-    println("a - b = ${a - b}")      // Vector(-2.0, -2.0)
-    println("a * 3 = ${a * 3.0}")    // Vector(3.0, 6.0)
-    println("-a = ${-a}")             // Vector(-1.0, -2.0)
+    println("=== Matematiske operatorer ===")
+    println("  a + b = ${a + b}")
+    println("  a - b = ${a - b}")
+    println("  a * 3 = ${a * 3.0}")
+    println("  -a   = ${-a}")
 
-    // compareTo
-    println("a < b: ${a < b}")       // true (magnitude)
-    println("|a| = ${"%.2f".format(a.magnitude)}, |b| = ${"%.2f".format(b.magnitude)}")
+    println("\n=== compareTo ===")
+    println("  a < b: ${a < b}")
+    println("  |a| = %.2f, |b| = %.2f".format(a.magnitude, b.magnitude))
 
-    // Matrix indexering
-    println()
-    val m = Matrix(2, 2)
-    m[0, 0] = 1.0
-    m[0, 1] = 2.0
-    m[1, 0] = 3.0
-    m[1, 1] = 4.0
-    println("Matrix:\n$m")
+    println("\n=== Indexering ===")
+    val m = Matrise(2, 2)
+    m[0, 0] = 1.0; m[0, 1] = 2.0
+    m[1, 0] = 3.0; m[1, 1] = 4.0
+    println(m)
 
-    // contains / in
-    println()
-    val box = BoundingBox(0.0, 0.0, 10.0, 10.0)
-    val inside = Vector(5.0, 5.0)
-    val outside = Vector(15.0, 5.0)
-    println("$inside in box: ${inside in box}")   // true
-    println("$outside in box: ${outside in box}") // false
+    println("\n=== contains med 'in' ===")
+    val boks = Rektangel(0.0, 0.0, 10.0, 10.0)
+    val inni = Vektor(5.0, 5.0)
+    val utenfor = Vektor(15.0, 5.0)
+    println("  $inni in boks:    ${inni in boks}")
+    println("  $utenfor in boks: ${utenfor in boks}")
 }

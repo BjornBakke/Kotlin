@@ -1,48 +1,65 @@
 package org.example.functional
 
-// tailrec — kompilatoren optimerer til loop, unngår stack overflow
-// Krav: rekursivt kall må være SISTE operasjon (ingen beregning etter kallet)
+/**
+ * TailRecursion — optimert rekursjon som blir til loop
+ *
+ * Dekker:
+ *  - tailrec modifier: kompilatoren optimerer rekursjonen til en løkke
+ *  - Krav: rekursivt kall MÅ være siste operasjon (ingen beregning etter)
+ *  - Bruk av akkumulator for å gjøre funksjonen tail-recursive
+ *
+ * Bruk når: du har rekursiv logikk (faktorial, fibonacci, gcd) og vil
+ * unngå StackOverflowError for store input.
+ *
+ * NB: Hvis du ikke får "Recursive call is not a tail call"-advarselen i
+ *     IntelliJ etter tailrec, er funksjonen din faktisk tail-recursive.
+ *     Omskriv med akkumulator hvis du får advarsel.
+ *
+ * Docs: https://kotlinlang.org/docs/functions.html#tail-recursive-functions
+ */
 
-tailrec fun factorial(n: Long, acc: Long = 1): Long = when {
-    n <= 1 -> acc
-    else -> factorial(n - 1, acc * n)  // tail position — siste operasjon
+// Tail-recursive faktorial med akkumulator
+tailrec fun faktorial(n: Long, akk: Long = 1): Long = when {
+    n <= 1 -> akk
+    else   -> faktorial(n - 1, akk * n)  // siste operasjon
 }
 
-// Fibonacci med tailrec
+// Tail-recursive Fibonacci med akkumulator
 tailrec fun fibonacci(n: Int, a: Long = 0, b: Long = 1): Long = when (n) {
-    0 -> a
-    1 -> b
+    0    -> a
+    1    -> b
     else -> fibonacci(n - 1, b, a + b)
 }
 
-// Uten tailrec ville dette krasje med StackOverflowError for store n
-tailrec fun sumTo(n: Long, acc: Long = 0): Long = when {
-    n <= 0 -> acc
-    else -> sumTo(n - 1, acc + n)
+tailrec fun sumTil(n: Long, akk: Long = 0): Long = when {
+    n <= 0 -> akk
+    else   -> sumTil(n - 1, akk + n)
 }
 
-// GCD (Euclids algoritme) — naturlig tail recursive
+// Euklids algoritme — naturlig tail recursive
 tailrec fun gcd(a: Int, b: Int): Int = when {
     b == 0 -> a
-    else -> gcd(b, a % b)
+    else   -> gcd(b, a % b)
 }
 
-// IKKE tailrec — beregning etter rekursivt kall
-fun factorialNonTail(n: Long): Long = when {
+// IKKE tail recursive — multiplikasjon skjer ETTER kallet
+fun faktorialIkkeTail(n: Long): Long = when {
     n <= 1 -> 1
-    else -> n * factorialNonTail(n - 1)  // multiplikasjon ETTER kall = ikke tail
+    else   -> n * faktorialIkkeTail(n - 1)
 }
 
 fun main() {
-    println("factorial(10) = ${factorial(10)}")       // 3628800
-    println("factorial(20) = ${factorial(20)}")       // 2432902008176640000
+    println("faktorial(10) = ${faktorial(10)}")
+    println("faktorial(20) = ${faktorial(20)}")
 
-    println("fibonacci(10) = ${fibonacci(10)}")       // 55
-    println("fibonacci(50) = ${fibonacci(50)}")       // 12586269025
+    println("fibonacci(10) = ${fibonacci(10)}")
+    println("fibonacci(50) = ${fibonacci(50)}")
 
     // Stor verdi — fungerer pga tailrec (ellers stack overflow)
-    println("sumTo(1_000_000) = ${sumTo(1_000_000)}") // 500000500000
+    println("sumTil(1_000_000) = ${sumTil(1_000_000)}")
 
-    println("gcd(48, 18) = ${gcd(48, 18)}")           // 6
-    println("gcd(100, 75) = ${gcd(100, 75)}")         // 25
+    println("gcd(48, 18) = ${gcd(48, 18)}")
+    println("gcd(100, 75) = ${gcd(100, 75)}")
+
+    println("\nfaktorialIkkeTail(10) = ${faktorialIkkeTail(10)}  (fungerer for små n)")
 }

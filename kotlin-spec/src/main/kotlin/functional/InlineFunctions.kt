@@ -1,59 +1,65 @@
 package org.example.functional
 
-// inline — kompilatoren kopierer funksjonsinnholdet inn på call-site
-// Fordel: unngår allokering av lambda-objekt + ekstra funksjonskall
+/**
+ * InlineFunctions — kopier lambda-koden inn på call-site
+ *
+ * Dekker:
+ *  - inline: kompilatoren kopierer funksjonsinnholdet der den kalles
+ *  - noinline: en spesifikk lambda som IKKE skal inlines
+ *  - reified: generisk type-parameter tilgjengelig ved runtime
+ *  - filterIsInstance med reified T
+ *
+ * Bruk når:
+ *  - Du har en HOF som brukes ofte med korte lambdaer (unngå allokering)
+ *  - Du trenger "reified T" (f.eks. T::class) i en generisk funksjon
+ *
+ * NB: inline gir ingen fordel om lambda er kompleks eller stor — da blåser
+ *     den opp call-site. Reserver til korte HOF-er (map, filter-lignende).
+ *
+ * Docs: https://kotlinlang.org/docs/inline-functions.html
+ */
 
-inline fun measureTime(block: () -> Unit): Long {
+inline fun mål(blokk: () -> Unit): Long {
     val start = System.nanoTime()
-    block()  // denne lambdaen inlines — ingen objektallokering
+    blokk()
     return System.nanoTime() - start
 }
 
-// noinline — parameter som IKKE skal inlines
-// Nødvendig hvis lambdaen skal lagres/returneres (inline lambdaer kan ikke det)
-inline fun runAndStore(
-    action: () -> Unit,
-    noinline callback: () -> Unit  // kan lagres fordi den ikke er inlinet
+// noinline tillater at lambdaen kan lagres/returneres
+inline fun kjørOgLagre(
+    handling: () -> Unit,
+    noinline tilbakekall: () -> Unit
 ): () -> Unit {
-    action()
-    return callback  // kan returnere noinline lambda
+    handling()
+    return tilbakekall  // kan returnere fordi noinline
 }
 
-// inline med reified type — gjor generisk type tilgjengelig ved runtime
-inline fun <reified T> isInstanceOf(value: Any): Boolean {
-    return value is T  // Normalt umulig med generics pga type erasure — reified fikser dette
-}
+// reified lar oss sjekke typen T ved runtime
+inline fun <reified T> erInstansAv(verdi: Any): Boolean = verdi is T
 
-inline fun <reified T> filterByType(items: List<Any>): List<T> {
-    return items.filterIsInstance<T>()
-}
-
-// Uten inline ville lambda-parametere blitt anonyme klasser (Java)
-// Med inline kopieres lambdaens kode direkte inn — mer effektivt for korte lambdaer
+inline fun <reified T> filterPåType(elementer: List<Any>): List<T> =
+    elementer.filterIsInstance<T>()
 
 fun main() {
-    // measureTime — lambda inlines, ingen allokering
-    val elapsed = measureTime {
+    println("=== måler tid (inline) ===")
+    val tid = mål {
         val sum = (1..1_000_000).sum()
-        println("Sum: $sum")
+        println("  Sum: $sum")
     }
-    println("Tok ${elapsed / 1_000_000}ms\n")
+    println("  Tok ${tid / 1_000_000}ms")
 
-    // noinline — callback kan returneres og lagres
-    val stored = runAndStore(
-        action = { println("Kjører handling") },
-        callback = { println("Lagret callback kjørt") }
+    println("\n=== noinline lambda kan returneres ===")
+    val lagret = kjørOgLagre(
+        handling = { println("  kjører handling") },
+        tilbakekall = { println("  lagret callback kjørt") }
     )
-    stored()  // kaller lagret callback
+    lagret()
 
-    // reified — type-sjekk ved runtime
-    println("\n42 er String: ${isInstanceOf<String>(42)}")
-    println("42 er Int: ${isInstanceOf<Int>(42)}")
+    println("\n=== reified — type tilgjengelig ved runtime ===")
+    println("  42 er String? ${erInstansAv<String>(42)}")
+    println("  42 er Int?    ${erInstansAv<Int>(42)}")
 
-    val mixed = listOf(1, "hello", 2.0, "world", 3)
-    println("Strenger: ${filterByType<String>(mixed)}")
-    println("Ints: ${filterByType<Int>(mixed)}")
+    val blandet: List<Any> = listOf(1, "hei", 2.0, "verden", 3)
+    println("  Strenger: ${filterPåType<String>(blandet)}")
+    println("  Ints:     ${filterPåType<Int>(blandet)}")
 }
-
-
-

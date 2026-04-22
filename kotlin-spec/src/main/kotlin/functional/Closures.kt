@@ -1,65 +1,76 @@
 package org.example.functional
 
-// Closure = lambda som fanger (lukker over) variabler fra omgivende scope
-// I Kotlin kan closures fange OG mutere variabler (i motsetning til Java)
+/**
+ * Closures — lambdaer som fanger variabler fra sitt scope
+ *
+ * Dekker:
+ *  - Lambda fanger variabler fra omgivende scope
+ *  - I Kotlin kan closures også MUTERE fangede variabler
+ *  - Counter-factory-mønsteret
+ *  - Closures som event handlers
+ *  - Akkumulator-mønster
+ *
+ * Bruk når: du vil ha en liten funksjon som husker kontekst (tilstand,
+ * konfigurasjon) uten å bygge en hel klasse.
+ *
+ * NB: I Java må fangede variabler være effectively final. Kotlin tillater
+ *     mutasjon — men vær forsiktig i concurrent kode (deling av tilstand).
+ *
+ * Docs: https://kotlinlang.org/docs/lambdas.html#closures
+ */
 
 fun main() {
-    // Closure fanger mutable variabel
-    var counter = 0
-    val increment = { counter++ }
-    val getCount = { counter }
+    println("=== Closure fanger og muterer ===")
+    var teller = 0
+    val inkrementer = { teller++ }
+    val hent = { teller }
 
-    increment()
-    increment()
-    increment()
-    println("Teller: ${getCount()}")  // 3
+    inkrementer(); inkrementer(); inkrementer()
+    println("  Teller: ${hent()}")  // 3
 
-    // Counter-factory — returnerer closures som deler tilstand
-    fun makeCounter(start: Int = 0): Pair<() -> Int, () -> Unit> {
-        var count = start
-        val get = { count }
-        val inc = { count++ ; Unit }
-        return get to inc
+    println("\n=== Counter-factory ===")
+    fun lagTeller(start: Int = 0): Pair<() -> Int, () -> Unit> {
+        var antall = start
+        return ({ antall }) to ({ antall++; Unit })
     }
 
-    val (getA, incA) = makeCounter()
-    val (getB, incB) = makeCounter(100)
+    val (hentA, incA) = lagTeller()
+    val (hentB, incB) = lagTeller(100)
     incA(); incA(); incA()
     incB()
-    println("A: ${getA()}, B: ${getB()}")  // A: 3, B: 101
+    println("  A=${hentA()}, B=${hentB()}")  // A=3, B=101
 
-    // Closure i collection-operasjoner
+    println("\n=== Closure i collection-operasjon ===")
     var total = 0
-    listOf(10, 20, 30).forEach { total += it }  // lambda fanger 'total'
-    println("Total: $total")  // 60
+    listOf(10, 20, 30).forEach { total += it }
+    println("  Total: $total")
 
-    // Closure med filter — fanger threshold
-    val threshold = 15
-    val aboveThreshold = listOf(5, 10, 15, 20, 25).filter { it > threshold }
-    println("Over $threshold: $aboveThreshold")
+    println("\n=== Closure fanger 'threshold' ===")
+    val terskel = 15
+    val over = listOf(5, 10, 15, 20, 25).filter { it > terskel }
+    println("  Over $terskel: $over")
 
-    // Closure som event handler
-    fun onClick(handler: (String) -> Unit) = handler("button_clicked")
+    println("\n=== Closure som event handler ===")
+    fun påKlikk(handler: (String) -> Unit) = handler("knapp_klikket")
 
-    var clickCount = 0
-    onClick { event ->
-        clickCount++
-        println("Hendelse: $event (klikk #$clickCount)")
+    var klikkTeller = 0
+    påKlikk { hendelse ->
+        klikkTeller++
+        println("  Hendelse: $hendelse (klikk #$klikkTeller)")
     }
-    onClick { event ->
-        clickCount++
-        println("Hendelse: $event (klikk #$clickCount)")
-    }
-
-    // Akkumulator-mønster
-    fun accumulator(initial: Int): (Int) -> Int {
-        var sum = initial
-        return { value -> sum += value; sum }
+    påKlikk { hendelse ->
+        klikkTeller++
+        println("  Hendelse: $hendelse (klikk #$klikkTeller)")
     }
 
-    val acc = accumulator(0)
-    println(acc(5))   // 5
-    println(acc(10))  // 15
-    println(acc(3))   // 18
+    println("\n=== Akkumulator ===")
+    fun akkumulator(start: Int): (Int) -> Int {
+        var sum = start
+        return { verdi -> sum += verdi; sum }
+    }
+
+    val akk = akkumulator(0)
+    println("  ${akk(5)}")   // 5
+    println("  ${akk(10)}")  // 15
+    println("  ${akk(3)}")   // 18
 }
-

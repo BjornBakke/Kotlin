@@ -1,83 +1,102 @@
 package org.example.advanced
 
-// when — Kotlin sin kraftige pattern matching
+/**
+ * when — Kotlin sitt kraftigste "pattern matching"-verktøy
+ *
+ * Dekker:
+ *  - when med sealed class — kompilator sjekker at _alle_ subklasser er håndtert
+ *  - when med enum — samme exhaustive-fordel, flere verdier pr. gren
+ *  - when med type-sjekk (is T) og smart cast
+ *  - when med range (in 1..10) og samling (in setOf(...))
+ *  - when _uten_ argument — som en kortere if/else-if-kjede
+ *  - when som uttrykk (returnerer verdi) vs. som statement
+ *
+ * Bruk når: du har mer enn ett if/else-nivå, eller når du vil at
+ *  kompilatoren skal tvinge deg til å håndtere alle tilfeller.
+ *
+ * Tip: Når `when` brukes som _uttrykk_ (verdi brukes), må alle tilfeller
+ *  dekkes. Med sealed class/enum blir `else`-grenen overflødig, noe som
+ *  gjør det umulig å glemme et tilfelle når du legger til en variant.
+ *
+ * Docs: https://kotlinlang.org/docs/control-flow.html#when-expression
+ */
 
-sealed class Expr {
-    data class Num(val value: Double) : Expr()
-    data class Sum(val left: Expr, val right: Expr) : Expr()
-    data class Mul(val left: Expr, val right: Expr) : Expr()
-    data object Undefined : Expr()
+// Sealed class-hierarki representerer et aritmetisk uttrykk
+private sealed class Uttrykk {
+    data class Tall(val verdi: Double) : Uttrykk()
+    data class Sum(val venstre: Uttrykk, val høyre: Uttrykk) : Uttrykk()
+    data class Produkt(val venstre: Uttrykk, val høyre: Uttrykk) : Uttrykk()
+    data object Udefinert : Uttrykk()
 }
 
-fun eval(expr: Expr): Double = when (expr) {
-    is Expr.Num -> expr.value
-    is Expr.Sum -> eval(expr.left) + eval(expr.right)
-    is Expr.Mul -> eval(expr.left) * eval(expr.right)
-    Expr.Undefined -> Double.NaN
+// Exhaustive when — ingen `else` nødvendig fordi alle varianter er dekket
+private fun evaluer(u: Uttrykk): Double = when (u) {
+    is Uttrykk.Tall -> u.verdi
+    is Uttrykk.Sum -> evaluer(u.venstre) + evaluer(u.høyre)
+    is Uttrykk.Produkt -> evaluer(u.venstre) * evaluer(u.høyre)
+    Uttrykk.Udefinert -> Double.NaN
 }
 
-enum class HttpStatus(val code: Int) {
-    OK(200), CREATED(201), BAD_REQUEST(400), NOT_FOUND(404), SERVER_ERROR(500)
+private enum class HttpStatus(val kode: Int) {
+    OK(200), OPPRETTET(201), UGYLDIG_FORESPØRSEL(400), IKKE_FUNNET(404), SERVERFEIL(500)
 }
 
-fun describeStatus(status: HttpStatus) = when (status) {
-    HttpStatus.OK, HttpStatus.CREATED -> "Suksess"
-    HttpStatus.BAD_REQUEST -> "Klientfeil"
-    HttpStatus.NOT_FOUND -> "Ikke funnet"
-    HttpStatus.SERVER_ERROR -> "Serverfeil"
+private fun beskrivStatus(status: HttpStatus): String = when (status) {
+    HttpStatus.OK, HttpStatus.OPPRETTET -> "Suksess"
+    HttpStatus.UGYLDIG_FORESPØRSEL -> "Klientfeil"
+    HttpStatus.IKKE_FUNNET -> "Ikke funnet"
+    HttpStatus.SERVERFEIL -> "Serverfeil"
 }
 
 fun main() {
-    // when med sealed class — exhaustive matching
-    val expr = Expr.Sum(Expr.Num(3.0), Expr.Mul(Expr.Num(2.0), Expr.Num(4.0)))
-    println("3 + (2 * 4) = ${eval(expr)}")  // 11.0
+    println("=== when + sealed class (exhaustive) ===")
+    val uttrykk = Uttrykk.Sum(Uttrykk.Tall(3.0), Uttrykk.Produkt(Uttrykk.Tall(2.0), Uttrykk.Tall(4.0)))
+    println("  3 + (2 * 4) = ${evaluer(uttrykk)}")
 
-    // when med enum
-    println(describeStatus(HttpStatus.OK))         // Success
-    println(describeStatus(HttpStatus.NOT_FOUND))   // Not found
+    println("\n=== when + enum (flere verdier pr. gren) ===")
+    println("  OK         -> ${beskrivStatus(HttpStatus.OK)}")
+    println("  IKKE_FUNNET -> ${beskrivStatus(HttpStatus.IKKE_FUNNET)}")
 
-    // when med type-sjekk
-    fun classify(obj: Any): String = when (obj) {
-        is String -> "Streng: '${obj.uppercase()}'"
-        is Int -> "Int: ${obj * 2}"
-        is List<*> -> "Liste med størrelse ${obj.size}"
-        else -> "Unknown"
+    println("\n=== when med type-sjekk (is) og smart cast ===")
+    fun klassifiser(obj: Any): String = when (obj) {
+        is String -> "Streng: '${obj.uppercase()}'"      // smart cast til String
+        is Int -> "Int: ${obj * 2}"                      // smart cast til Int
+        is List<*> -> "Liste med størrelse ${obj.size}"  // smart cast til List
+        else -> "Ukjent"
     }
-    println(classify("hello"))
-    println(classify(21))
-    println(classify(listOf(1, 2)))
+    println("  ${klassifiser("hei")}")
+    println("  ${klassifiser(21)}")
+    println("  ${klassifiser(listOf(1, 2, 3))}")
 
-    // when med range
-    fun gradeOf(score: Int) = when (score) {
+    println("\n=== when med range (in 1..10) ===")
+    fun karakterFor(poeng: Int): String = when (poeng) {
         in 90..100 -> "A"
         in 80..89 -> "B"
         in 70..79 -> "C"
         in 60..69 -> "D"
         else -> "F"
     }
-    println("Poeng 85 = ${gradeOf(85)}")
-    println("Poeng 42 = ${gradeOf(42)}")
+    println("  85 poeng -> ${karakterFor(85)}")
+    println("  42 poeng -> ${karakterFor(42)}")
 
-    // when som expression (uten argument)
+    println("\n=== when uten argument (erstatter if/else-if-kjeder) ===")
     val temp = 25
-    val weather = when {
-        temp < 0 -> "Freezing"
-        temp < 15 -> "Cold"
-        temp < 25 -> "Nice"
-        temp < 35 -> "Hot"
-        else -> "Extreme"
+    val vær = when {
+        temp < 0 -> "Iskaldt"
+        temp < 15 -> "Kaldt"
+        temp < 25 -> "Behagelig"
+        temp < 35 -> "Varmt"
+        else -> "Ekstremt"
     }
-    println("${temp}°C = $weather")
+    println("  ${temp}°C -> $vær")
 
-    // when med flere verdier i en branch
-    val char = 'a'
-    val type = when (char) {
-        'a', 'e', 'i', 'o', 'u' -> "vowel"
-        in 'a'..'z' -> "consonant"
+    println("\n=== when med flere verdier og ranges blandet ===")
+    val tegn = 'a'
+    val type = when (tegn) {
+        'a', 'e', 'i', 'o', 'u', 'y' -> "vokal"
+        in 'a'..'z' -> "liten konsonant"
         in 'A'..'Z' -> "stor bokstav"
-        else -> "other"
+        else -> "annet"
     }
-    println("'$char' is a $type")
+    println("  '$tegn' er en $type")
 }
-
-

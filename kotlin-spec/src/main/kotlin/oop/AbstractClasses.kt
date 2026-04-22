@@ -1,54 +1,63 @@
 package org.example.oop
 
-// Abstrakt klasse: kan ha tilstand (properties med verdier) + abstrakte members
-abstract class Animal(val name: String) {
-    // Abstrakt — må overrides
-    abstract fun sound(): String
+/**
+ * AbstractClasses — abstrakte klasser
+ *
+ * Dekker:
+ *  - abstract class kan ikke instansieres direkte
+ *  - Blanding av abstrakte og konkrete medlemmer
+ *  - Abstrakt property som må overrides
+ *  - Forskjell fra interface: kan ha constructor og tilstand
+ *
+ * Bruk når: du har felles tilstand OG atferd for en gruppe typer, og
+ * minst én ting må implementeres av subklasser.
+ *
+ * NB: Abstrakte klasser støtter kun én-til-én arv. Trenger du multippel,
+ *     bruk interface. Trenger du både tilstand og multippel, må du
+ *     komponere med delegation eller interface-properties.
+ *
+ * Docs: https://kotlinlang.org/docs/classes.html#abstract-classes
+ */
 
-    // Konkret — arves som den er
-    fun describe() = "$name sier ${sound()}"
+abstract class Dyr(val navn: String) {
+    abstract fun lyd(): String                      // må implementeres
+    fun beskriv() = "$navn sier ${lyd()}"           // konkret — arves som den er
 }
 
-class Dog(name: String) : Animal(name) {
-    override fun sound() = "Voff!"
+class Hund(navn: String) : Dyr(navn) {
+    override fun lyd() = "Voff!"
 }
 
-class Cat(name: String) : Animal(name) {
-    override fun sound() = "Meow!"
+class Katt(navn: String) : Dyr(navn) {
+    override fun lyd() = "Mjau!"
 }
 
 // Abstrakt klasse med abstrakt property
-abstract class Notification {
-    abstract val channel: String
-    abstract val message: String
-
-    fun send() = println("[$channel] $message")
+abstract class Varsel {
+    abstract val kanal: String
+    abstract val melding: String
+    fun send() = println("[$kanal] $melding")
 }
 
-class EmailNotification(override val message: String) : Notification() {
-    override val channel = "EMAIL"
+class EpostVarsel(override val melding: String) : Varsel() {
+    override val kanal = "E-POST"
 }
 
-class SmsNotification(override val message: String) : Notification() {
-    override val channel = "SMS"
+class SmsVarsel(override val melding: String) : Varsel() {
+    override val kanal = "SMS"
 }
-
-// Forskjell fra interface: abstrakt klasse kan ha constructor og tilstand
-// Interface kan IKKE ha constructor eller lagre tilstand
 
 fun main() {
-    val animals = listOf(Dog("Rex"), Cat("Whiskers"))
-    animals.forEach { println(it.describe()) }
-    // Rex says Voff!
-    // Whiskers says Meow!
+    val dyr = listOf(Hund("Rex"), Katt("Pusen"))
+    dyr.forEach { println(it.beskriv()) }
+    // Rex sier Voff!
+    // Pusen sier Mjau!
 
-    val notifications = listOf(
-        EmailNotification("Velkommen!"),
-        SmsNotification("Koden din er 1234")
+    println()
+
+    val varsler = listOf(
+        EpostVarsel("Velkommen!"),
+        SmsVarsel("Koden din er 1234")
     )
-    notifications.forEach { it.send() }
-    // [EMAIL] Welcome!
-    // [SMS] Koden din er 1234
+    varsler.forEach { it.send() }
 }
-
-

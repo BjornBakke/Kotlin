@@ -1,16 +1,10 @@
-package Intermediate
+package org.example.intermediate
 
-fun main() {
-    val medals: List<String> = listOf("Gold", "Silver", "Bronze")
-    val reversedLongUppercaseMedals: List<String> =
-        medals
-            .map { it.uppercase() }
-            .also { println(it) }
-            // [GOLD, SILVER, BRONZE]
-            .filter { it.length > 4 }
-            .also { println(it) }
-            // [SILVER, BRONZE]
-            .reversed()
-    println(reversedLongUppercaseMedals)
-    // [BRONZE, SILVER]
-}
+/**
+ * (tom stub)
+ *
+ * Det originale innholdet i denne filen lå i en fil med et BOM-tegn i
+ * filnavnet (Also\uFEFF.kt). Innholdet er flyttet til den rene Also.kt.
+ * Filen er beholdt tom fordi filsystemet ikke tillater sletting i
+ * denne sesjonen.
+ */

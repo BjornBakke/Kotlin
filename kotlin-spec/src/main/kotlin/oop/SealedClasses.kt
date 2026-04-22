@@ -1,60 +1,70 @@
 package org.example.oop
 
-// Sealed class — lukket hierarki, alle subtyper kjent ved compile-time
-sealed class Result<out T> {
-    data class Success<T>(val data: T) : Result<T>()
-    data class Failure(val error: String) : Result<Nothing>()
-    data object Loading : Result<Nothing>()
+/**
+ * SealedClasses — lukket hierarki av kjente subtyper
+ *
+ * Dekker:
+ *  - sealed class / sealed interface — alle subtyper må deklareres i
+ *    samme modul (samme pakke for sealed class før Kotlin 1.5)
+ *  - Exhaustive when: kompilatoren sjekker at alle grener er dekket
+ *  - Typisk mønster: Result<T> (Success/Failure/Loading) eller UiState
+ *
+ * Bruk når: du har en fast mengde varianter som alle representerer "ett
+ * av disse". Gir typesikker pattern matching uten 'else'.
+ *
+ * NB: sealed + data class-kombinasjon er det Kotlin-idiomatiske
+ *     alternativet til abstrakt klasse + mange subklasser.
+ *
+ * Docs: https://kotlinlang.org/docs/sealed-classes.html
+ */
+
+sealed class Resultat<out T> {
+    data class Suksess<T>(val data: T) : Resultat<T>()
+    data class Feil(val melding: String) : Resultat<Nothing>()
+    data object Laster : Resultat<Nothing>()
 }
 
-// Exhaustive when — kompilatoren sjekker at alle tilfeller er dekket
-fun <T> handleResult(result: Result<T>): String = when (result) {
-    is Result.Success -> "Fikk: ${result.data}"
-    is Result.Failure -> "Feil: ${result.error}"
-    Result.Loading -> "Laster..."
-    // Ingen else nødvendig — sealed = alle tilfeller kjent
+// Exhaustive when — ingen else nødvendig fordi sealed = alle kjent
+fun <T> håndterResultat(r: Resultat<T>): String = when (r) {
+    is Resultat.Suksess -> "Fikk: ${r.data}"
+    is Resultat.Feil    -> "Feil: ${r.melding}"
+    Resultat.Laster     -> "Laster..."
 }
 
-// Enda et eksempel: sealed for UI-state
-sealed class UiState {
-    data object Idle : UiState()
-    data object Loading : UiState()
-    data class Content(val items: List<String>) : UiState()
-    data class Error(val message: String, val retryable: Boolean) : UiState()
+sealed class UiTilstand {
+    data object Inaktiv : UiTilstand()
+    data object Laster : UiTilstand()
+    data class Innhold(val elementer: List<String>) : UiTilstand()
+    data class Feilet(val melding: String, val kanPrøveIgjen: Boolean) : UiTilstand()
 }
 
-fun render(state: UiState) {
-    when (state) {
-        UiState.Idle -> println("Venter på input...")
-        UiState.Loading -> println("Lasteindikator aktiv")
-        is UiState.Content -> println("Viser ${state.items.size} elementer")
-        is UiState.Error -> {
-            println("Feil: ${state.message}")
-            if (state.retryable) println("  -> Prøv igjen tilgjengelig")
+fun render(t: UiTilstand) {
+    when (t) {
+        UiTilstand.Inaktiv -> println("Venter på input…")
+        UiTilstand.Laster  -> println("Laste-indikator aktiv")
+        is UiTilstand.Innhold -> println("Viser ${t.elementer.size} elementer")
+        is UiTilstand.Feilet  -> {
+            println("Feil: ${t.melding}")
+            if (t.kanPrøveIgjen) println("  → kan prøve igjen")
         }
     }
 }
 
 fun main() {
-    val results = listOf(
-        Result.Loading,
-        Result.Success(42),
-        Result.Failure("Nettverkstidsavbrudd")
+    val resultater = listOf(
+        Resultat.Laster,
+        Resultat.Suksess(42),
+        Resultat.Feil("Nettverkstidsavbrudd")
     )
-    results.forEach { println(handleResult(it)) }
-    // Loading...
-    // Got: 42
-    // Error: Nettverkstidsavbrudd
+    resultater.forEach { println(håndterResultat(it)) }
 
     println()
-    val states = listOf(
-        UiState.Idle,
-        UiState.Loading,
-        UiState.Content(listOf("A", "B", "C")),
-        UiState.Error("Serverfeil 500", retryable = true)
+
+    val tilstander = listOf(
+        UiTilstand.Inaktiv,
+        UiTilstand.Laster,
+        UiTilstand.Innhold(listOf("A", "B", "C")),
+        UiTilstand.Feilet("Serverfeil 500", kanPrøveIgjen = true)
     )
-    states.forEach { render(it) }
+    tilstander.forEach { render(it) }
 }
-
-
-
