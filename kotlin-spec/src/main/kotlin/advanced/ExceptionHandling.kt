@@ -1,72 +1,86 @@
 package org.example.advanced
 
-// Custom exception
-class ValidationException(val field: String, message: String) : Exception(message)
+/**
+ * ExceptionHandling — try, catch, finally, throw
+ *
+ * Dekker:
+ *  - try-catch-finally
+ *  - try som uttrykk (returnerer verdi)
+ *  - Flere catch-blokker for ulike exceptions
+ *  - Custom exception (arver Exception)
+ *  - throw som uttrykk, Nothing-type
+ *
+ * Bruk når: du må håndtere feil fra IO, parsing, eller egen validering.
+ *
+ * NB: Kotlin har ingen "checked exceptions" som Java. Alle unntak er
+ *     runtime — så kompilatoren tvinger deg ikke til å fange dem.
+ *
+ * Docs: https://kotlinlang.org/docs/exceptions.html
+ */
 
-// throw som Nothing — uttrykk som aldri returnerer
-fun fail(message: String): Nothing {
-    throw IllegalStateException(message)
-}
+class ValideringsException(val felt: String, melding: String) : Exception(melding)
+
+// Nothing = funksjon returnerer aldri normalt
+fun feil(melding: String): Nothing = throw IllegalStateException(melding)
 
 fun main() {
-    // try-catch-finally
+    println("=== try-catch-finally ===")
     try {
-        val result = "abc".toInt()
-        println(result)
+        val r = "abc".toInt()
+        println("  $r")
     } catch (e: NumberFormatException) {
-        println("Feil fanget: ${e.message}")
+        println("  fanget: ${e.message}")
     } finally {
-        println("Finally kjøres alltid")
+        println("  finally kjøres alltid")
     }
 
-    // try som expression — returnerer verdi
-    val number = try {
+    println("\n=== try som uttrykk ===")
+    val tall = try {
         "42".toInt()
     } catch (e: NumberFormatException) {
         -1
     }
-    println("Tolket: $number")
+    println("  tolket: $tall")
 
-    val invalid = try {
+    val ugyldig = try {
         "nope".toInt()
     } catch (e: NumberFormatException) {
         -1
     }
-    println("Ugyldig: $invalid")
+    println("  ugyldig: $ugyldig")
 
-    // Flere catch-blokker
-    fun riskyOperation(input: String): String = try {
-        val index = input.toInt()
-        val items = listOf("a", "b", "c")
-        items[index]
+    println("\n=== Flere catch ===")
+    fun risikabelOp(input: String): String = try {
+        val i = input.toInt()
+        val elementer = listOf("a", "b", "c")
+        elementer[i]
     } catch (e: NumberFormatException) {
         "Ikke et tall: $input"
     } catch (e: IndexOutOfBoundsException) {
         "Indeks utenfor gyldig område: $input"
     }
+    println("  ${risikabelOp("1")}")
+    println("  ${risikabelOp("abc")}")
+    println("  ${risikabelOp("99")}")
 
-    println(riskyOperation("1"))     // b
-    println(riskyOperation("abc"))   // Not a number: abc
-    println(riskyOperation("99"))    // Index out of range: 99
-
-    // Custom exception
-    fun validateAge(age: Int) {
-        if (age < 0 || age > 150) {
-            throw ValidationException("age", "Alder må være 0-150, fikk $age")
+    println("\n=== Custom exception ===")
+    fun valider(alder: Int) {
+        if (alder < 0 || alder > 150) {
+            throw ValideringsException("alder", "Alder må være 0-150, fikk $alder")
         }
     }
-
     try {
-        validateAge(200)
-    } catch (e: ValidationException) {
-        println("Validering feilet for '${e.field}': ${e.message}")
+        valider(200)
+    } catch (e: ValideringsException) {
+        println("  validering feilet for '${e.felt}': ${e.message}")
     }
 
-    // throw som Nothing — kan brukes i elvis operator
-    val name: String? = null
-    val safeName = name ?: fail("Navn er påkrevd")  // krasjer her
-    // Linje under nås aldri, men kompilatoren vet det pga Nothing
-    println(safeName)
+    println("\n=== Nothing med elvis ===")
+    val navn: String? = null
+    try {
+        val bekreftet = navn ?: feil("Navn er påkrevd")
+        println("  aldri her: $bekreftet")
+    } catch (e: IllegalStateException) {
+        println("  elvis + feil(): ${e.message}")
+    }
 }
-
-

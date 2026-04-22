@@ -1,51 +1,67 @@
 package org.example.functional
 
-// Data class destructuring — component1(), component2(), etc. genereres automatisk
-data class Point(val x: Double, val y: Double)
-data class Person(val name: String, val age: Int, val city: String)
+/**
+ * Destructuring — pakk ut verdier fra data class, Pair, Triple, Map
+ *
+ * Dekker:
+ *  - val (a, b) = dataClass
+ *  - _ for å hoppe over komponenter
+ *  - Pair og Triple destructuring
+ *  - Destructuring i for-løkke over Map
+ *  - Destructuring i lambda-parameter
+ *
+ * Bruk når: du vil trekke ut flere felt fra et objekt og gi dem lokale
+ * navn uten å skrive objekt.felt flere ganger.
+ *
+ * NB: Destructuring bruker componentN()-funksjoner. Data class genererer
+ *     disse automatisk; vanlige klasser må implementere dem selv.
+ *
+ * Docs: https://kotlinlang.org/docs/destructuring-declarations.html
+ */
 
-fun getUser(): Pair<String, Int> = "Alice" to 30
-fun getCoordinates(): Triple<Double, Double, Double> = Triple(1.0, 2.0, 3.0)
+data class Punkt(val x: Double, val y: Double)
+data class Person(val navn: String, val alder: Int, val by: String)
+
+private fun hentBruker(): Pair<String, Int> = "Alice" to 30
+private fun hentKoordinater(): Triple<Double, Double, Double> = Triple(1.0, 2.0, 3.0)
 
 fun main() {
-    // Data class destructuring
-    val point = Point(3.0, 4.0)
-    val (x, y) = point
-    println("x=$x, y=$y")
+    println("=== Data class ===")
+    val p = Punkt(3.0, 4.0)
+    val (x, y) = p
+    println("  x=$x, y=$y")
 
-    // Skip med _
+    println("\n=== Hopp over med _ ===")
     val person = Person("Bob", 25, "Oslo")
-    val (name, _, city) = person  // skipper age
-    println("$name fra $city")
+    val (navn, _, by) = person
+    println("  $navn fra $by")
 
-    // Pair destructuring
-    val (userName, userAge) = getUser()
-    println("$userName er $userAge")
+    println("\n=== Pair / Triple ===")
+    val (brukerNavn, brukerAlder) = hentBruker()
+    println("  $brukerNavn er $brukerAlder")
 
-    // Triple destructuring
-    val (a, b, c) = getCoordinates()
-    println("Coords: $a, $b, $c")
+    val (a, b, c) = hentKoordinater()
+    println("  Koordinater: $a, $b, $c")
 
-    // For-loop destructuring med Map
-    val scores = mapOf("Alice" to 95, "Bob" to 87, "Carol" to 92)
-    for ((student, score) in scores) {
-        println("$student: $score")
+    println("\n=== For-løkke over Map ===")
+    val poeng = mapOf("Alice" to 95, "Bob" to 87, "Clara" to 92)
+    for ((elev, p) in poeng) {
+        println("  $elev: $p")
     }
 
-    // For-loop med withIndex
-    val fruits = listOf("Apple", "Banana", "Cherry")
-    for ((index, fruit) in fruits.withIndex()) {
-        println("$index: $fruit")
+    println("\n=== withIndex ===")
+    val frukt = listOf("eple", "banan", "kirsebær")
+    for ((indeks, f) in frukt.withIndex()) {
+        println("  $indeks: $f")
     }
 
-    // Lambda parameter destructuring
-    println("\nToppresultater:")
-    scores.filter { (_, score) -> score >= 90 }
-        .forEach { (name, score) -> println("  $name: $score") }
+    println("\n=== Lambda-parameter destructuring ===")
+    println("  Toppresultater:")
+    poeng.filter { (_, p) -> p >= 90 }
+         .forEach { (navn, p) -> println("    $navn: $p") }
 
-    // Destructuring i map-operasjoner
-    val pairs = listOf("a" to 1, "b" to 2, "c" to 3)
-    val result = pairs.map { (letter, number) -> "$letter=$number" }
-    println(result)
+    println("\n=== Destructuring i map-operasjon ===")
+    val par = listOf("a" to 1, "b" to 2, "c" to 3)
+    val resultat = par.map { (bokstav, tall) -> "$bokstav=$tall" }
+    println("  $resultat")
 }
-

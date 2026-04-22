@@ -1,74 +1,89 @@
 package org.example.oop
 
-// Primary constructor — i klasse-signaturen
-class Person(val name: String, var age: Int) {
-    // init-blokk — kjøres etter primary constructor
+/**
+ * Constructors — primary og secondary constructors
+ *
+ * Dekker:
+ *  - Primary constructor i klasse-signaturen
+ *  - init-blokker for logikk som må kjøre under initialisering
+ *  - Secondary constructors med delegering via this(...)
+ *  - Default-verdier — ofte erstatter flere constructor-overloads
+ *  - Initialiseringsrekkefølge
+ *
+ * Bruk når: du vil styre hvordan objekter opprettes. Primary constructor
+ * er idiomatisk i Kotlin — secondary trengs sjelden.
+ *
+ * NB: Property-initializers og init-blokker kjøres i rekkefølgen de står
+ *     i kildekoden. Secondary constructor kjører ETTER primary + alle init.
+ *
+ * Docs: https://kotlinlang.org/docs/classes.html#constructors
+ */
+
+// Primary constructor + init-blokker
+class Person(val navn: String, var alder: Int) {
     init {
-        println("Person opprettet: $name, alder $age")
-        require(age >= 0) { "Alder kan ikke være negativ" }
+        println("Person opprettet: $navn, alder $alder")
+        require(alder >= 0) { "Alder kan ikke være negativ" }
     }
 
     // Flere init-blokker kjøres i rekkefølge
     init {
-        println("  (init block 2)")
+        println("  (init-blokk 2)")
     }
 }
 
-// Secondary constructor — bruker constructor keyword
-class Employee(val name: String, val department: String) {
-    var title: String = "Associate"
+// Secondary constructor
+class Ansatt(val navn: String, val avdeling: String) {
+    var tittel: String = "Associate"
 
-    // Secondary constructor må delegere til primary via this()
-    constructor(name: String, department: String, title: String) : this(name, department) {
-        this.title = title
+    // Secondary må delegere til primary via this()
+    constructor(navn: String, avdeling: String, tittel: String) : this(navn, avdeling) {
+        this.tittel = tittel
     }
 
-    override fun toString() = "$name - $title @ $department"
+    override fun toString() = "$navn — $tittel @ $avdeling"
 }
 
-// Initialiseringsrekkefølge: primary constructor → property-initializers/init-blokker (i kode-rekkefølge)
-class InitOrder(val input: String) {
-    val first = "Første: $input".also(::println)
+// Initialiseringsrekkefølge
+class InitRekkefølge(val input: String) {
+    val første = "Første: $input".also(::println)
 
     init {
         println("Init-blokk: $input")
     }
 
-    val second = "Andre: $input".also(::println)
+    val andre = "Andre: $input".also(::println)
 
     init {
         println("Init-blokk 2: $input")
     }
 }
 
-// Default-verdier i primary constructor
-class Config(
+// Default-verdier — erstatter flere overloads
+class Konfig(
     val host: String = "localhost",
     val port: Int = 8080,
-    val secure: Boolean = false
+    val sikker: Boolean = false
 ) {
-    override fun toString() = "${if (secure) "https" else "http"}://$host:$port"
+    override fun toString() = "${if (sikker) "https" else "http"}://$host:$port"
 }
 
 fun main() {
-    val person = Person("Alice", 30)
+    Person("Alice", 30)
     println()
 
-    // Secondary constructor
-    val emp1 = Employee("Bob", "Engineering")
-    val emp2 = Employee("Carol", "Engineering", "Senioringeniør")
-    println(emp1)  // Bob - Associate @ Engineering
-    println(emp2)  // Carol - Senioringeniør @ Engineering
+    val a1 = Ansatt("Bob", "Teknisk")
+    val a2 = Ansatt("Clara", "Teknisk", "Senioringeniør")
+    println(a1)
+    println(a2)
     println()
 
-    // Initialiseringsrekkefølge
-    println("--- Init order ---")
-    InitOrder("test")
+    println("--- Initialiseringsrekkefølge ---")
+    InitRekkefølge("test")
     println()
 
-    // Default-verdier — kan utelate parametere
-    println(Config())                          // http://localhost:8080
-    println(Config("api.example.com", 443, true))  // https://api.example.com:443
-    println(Config(port = 9090))               // http://localhost:9090
+    // Default-verdier: tre lovlige kall
+    println(Konfig())                          // http://localhost:8080
+    println(Konfig("api.example.com", 443, true))
+    println(Konfig(port = 9090))
 }
-

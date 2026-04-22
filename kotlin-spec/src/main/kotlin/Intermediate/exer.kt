@@ -1,17 +1,10 @@
-package Intermediate
+package org.example.intermediate
 
-data class User(val id: Int, var email: String)
-
-fun updateEmail(user: User, newEmail: String): User =
-    user.apply {
-        email = newEmail
-    }.also { println("oppatett mne denne $newEmail med id:${it.id}/ ${it.email} ") }
-
-fun main() {
-    val user = User(1, "old_email@example.com")
-    val updatedUser = updateEmail(user, "new_email@example.com")
-    // Updating email for user with ID: 1
-
-    println("Oppdatert bruker: $updatedUser")
-    // Updated User: User(id=1, email=new_email@example.com)
-}
+/**
+ * (tom stub)
+ *
+ * Innholdet i denne filen ble flyttet inn i Apply.kt og Also.kt
+ * som del av opprydningen. Filen er beholdt tom fordi filsystemet
+ * i dette oppsettet ikke tillater sletting. Se Apply.kt / Also.kt
+ * for oppdaterte eksempler.
+ */
