@@ -1,38 +1,35 @@
 package org.example.basis
 
 /**
- * Klasser — vanlige klasser og data classes
+ * Klasser — vanlige klasser med constructor og properties
  *
  * Dekker:
  *  - Primary constructor med val / var-parametere som blir properties
  *  - Default-verdier i constructor
- *  - data class — genererer equals, hashCode, toString, copy, componentN
- *  - copy() for å lage en modifisert kopi
- *  - Destructuring via componentN (se Destructuring.kt for mer)
+ *  - Egne properties i klassekroppen
+ *  - Forskjellen på immutable og mutable felt
+ *  - Når en vanlig klasse er et bedre valg enn en data class
  *
- * Bruk når: du trenger en verdibærende klasse (DTO, record). Velg data
- * class hvis objektet i hovedsak er en ren dataholder.
+ * Bruk når: du vil modellere et objekt med litt mer identitet eller
+ * egen tilstand enn en ren dataholder. Se DataClasses.kt for data class.
  *
- * NB: data class krever minst én parameter i primary constructor og
- *     sammenligner med equals() basert på alle primary-parametere.
+ * NB: en vanlig klasse får ikke automatisk `copy`, `equals` eller
+ *     destructuring. Velg vanlig klasse når det er et poeng at objektet
+ *     ikke bare er "en pose data".
  *
  * Docs: https://kotlinlang.org/docs/classes.html
- *       https://kotlinlang.org/docs/data-classes.html
  */
 
 // Vanlig klasse med primary constructor
-class Kontakt(val id: Int, var epost: String)
+private class Kontakt(val id: Int, var epost: String)
 
 // Klasse med default-verdi og egen property
-class Kontakt2(
+private class Kontakt2(
     val id: Int,
     var epost: String = "eksempel@gmail.com"
 ) {
     val kategori: String = "jobb"
 }
-
-// data class — automatiske equals/hashCode/toString/copy/componentN
-data class Bruker(val navn: String, val id: Int)
 
 fun main() {
     val k = Kontakt(1, "mari@gmail.com")
@@ -41,16 +38,13 @@ fun main() {
     val k2 = Kontakt2(2)                  // bruker default-epost
     println("Kontakt2: ${k2.id}, ${k2.epost}, kategori=${k2.kategori}")
 
-    val bruker = Bruker("Alex", 1)
-    println("Bruker (toString auto): $bruker")
+    k.epost = "ny.epost@gmail.com"
+    println("Oppdatert kontakt: id=${k.id}, epost=${k.epost}")
 
-    val maks = bruker.copy(navn = "Maks") // lag ny versjon med ett endret felt
-    println("Etter copy: $maks")
+    println("Vanlige klasser sammenlignes på referanse som standard:")
+    val første = Kontakt(3, "alex@gmail.com")
+    val andre = Kontakt(3, "alex@gmail.com")
+    println("første == andre? ${første == andre}")
 
-    val (navn, id) = bruker               // destructuring via componentN
-    println("Destruktur: navn=$navn, id=$id")
-
-    // Equals er automatisk for data class
-    val duplikat = Bruker("Alex", 1)
-    println("bruker == duplikat? ${bruker == duplikat}")
+    println("For verdibaserte modeller er DataClasses.kt et bedre valg.")
 }

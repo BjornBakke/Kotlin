@@ -9,6 +9,8 @@ Prosjektet bygges med Maven og Kotlin Maven Plugin.
 
 ## Innhold
 
+- [Start her](#start-her)
+- [Anbefalt læringssti](#anbefalt-læringssti)
 - [Prosjektstruktur](#prosjektstruktur)
 - [Krav](#krav)
 - [Kom i gang](#kom-i-gang)
@@ -18,6 +20,35 @@ Prosjektet bygges med Maven og Kotlin Maven Plugin.
 - [Testing](#testing)
 - [Publisere til GitHub](#publisere-til-github)
 - [Tips](#tips)
+
+## Start her
+
+Dette repoet er laget for to ting samtidig:
+
+- å lære Kotlin steg for steg
+- å fungere som et personlig oppslagsverk når du trenger et konkret eksempel senere
+
+Hvis du er ny i Kotlin, ikke hopp tilfeldig mellom filer. Start i `basis/`, kjør filene
+enkeltvis, og les toppkommentaren før du ser på implementasjonen. Når et tema sitter,
+går du videre til neste nivå.
+
+## Anbefalt læringssti
+
+`basis -> oop -> intermediate -> functional -> advanced`
+
+- `basis`: lær syntaks, kontrollflyt, nullsafety, collections og enkle klasser
+- `oop`: bygg forståelse for arv, interfaces, sealed classes, objekter og synlighet
+- `intermediate`: lær scope-funksjoner, extension functions og generics
+- `functional`: jobb med funksjonsreferanser, sekvenser, inline-funksjoner og samlingsoperasjoner
+- `advanced`: bruk delegasjon, operatorer, egenskaper og mer avansert Kotlin-standardbibliotek
+
+Praktisk arbeidsmåte:
+
+- velg én fil
+- kjør `main()`
+- les utskriften
+- endre litt i eksemplet selv
+- gå videre først når du kan forklare hvorfor koden virker
 
 ## Prosjektstruktur
 
@@ -75,7 +106,8 @@ Kjør en enkelt fil i IntelliJ ved å trykke på grønn pil ved siden av `fun ma
 | Minste mulige program | `basis/Main.kt` | `fun main()`, val/var, string templates, enkel for-løkke |
 | Kontrollflyt | `basis/ControlFlow.kt` | if/when/for/while, ranges (`..`, `downTo`, `step`, `withIndex`) |
 | String templates | `basis/StringTemplates.kt` | `$var`, `${expr}`, escape av `$`, trimIndent/trimMargin |
-| Klasser og data class | `basis/Klasser.kt` | primærkonstruktør, data class, `copy`, `componentN`, `equals` |
+| Klasser | `basis/Klasser.kt` | primærkonstruktør, mutable properties, vanlige klasser og identitet |
+| Data classes | `basis/DataClasses.kt` | `data class`, `copy`, `equals`, `toString`, destructuring |
 | Collections (List) | `basis/Collections.kt` | read-only vs mutable, `listOf`/`mutableListOf` |
 | Set | `basis/Set.kt` | `setOf`, unikhet, allowliste-eksempel |
 | Map | `basis/Map.kt` | `mapOf`, `to`-infix, iterasjon, backtick-navn |
@@ -112,6 +144,7 @@ Kjør en enkelt fil i IntelliJ ved å trykke på grønn pil ved siden av `fun ma
 | `run` | `Intermediate/Run.kt` | konfigurering + returverdi |
 | `with` | `Intermediate/With.kt` | kall flere metoder på samme objekt |
 | Extension functions | `Intermediate/Extensionfunctions.kt` | utvid eksisterende typer (String, egne klasser, generisk, nullable) |
+| Generics | `Intermediate/Generics.kt` | generiske funksjoner, klasser og `in`/`out` |
 
 ### functional — funksjonell programmering
 
@@ -189,3 +222,4 @@ git push -u origin main
 - Hold commits små og tematisk avgrenset
 - Start alltid med header-kommentaren i en fil — den gir kontekst før koden
 - Bruk IntelliJ sin grønne "run"-pil ved siden av `fun main()` for å kjøre én fil
+- Når du står fast: slå opp i README først og følg læringsstien i stedet for å hoppe tilfeldig
