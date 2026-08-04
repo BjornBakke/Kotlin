@@ -1,66 +1,71 @@
 package org.example.oop
 
-// Basic enum
-enum class Direction {
-    NORTH, SOUTH, EAST, WEST
+/**
+ * EnumClasses — oppregning av en lukket mengde verdier
+ *
+ * Dekker:
+ *  - Enkel enum med konstanter
+ *  - Enum med properties og metoder
+ *  - Enum som implementerer interface
+ *  - entries, name, ordinal, valueOf
+ *  - when-uttrykk over enum (exhaustive)
+ *
+ * Bruk når: du har en fast mengde typer (retninger, statuskoder, dager).
+ *
+ * NB: entries (ny i Kotlin 1.9+) erstatter den eldre values(). entries
+ *     returnerer en List (ikke Array) og er litt mer effektiv.
+ *
+ * Docs: https://kotlinlang.org/docs/enum-classes.html
+ */
+
+enum class Retning {
+    NORD, SØR, ØST, VEST
 }
 
 // Enum med properties og metoder
-enum class Planet(val mass: Double, val radius: Double) {
-    MERCURY(3.303e+23, 2.4397e6),
-    VENUS(4.869e+24, 6.0518e6),
-    EARTH(5.976e+24, 6.37814e6),
-    MARS(6.421e+23, 3.3972e6);
+enum class Planet(val masse: Double, val radius: Double) {
+    MERKUR(3.303e+23,  2.4397e6),
+    VENUS (4.869e+24,  6.0518e6),
+    JORDEN(5.976e+24,  6.37814e6),
+    MARS  (6.421e+23,  3.3972e6);  // semikolon før metoder
 
-    // Gravitasjonskonstant
     private val G = 6.67300E-11
-
-    fun surfaceGravity() = G * mass / (radius * radius)
-    fun surfaceWeight(otherMass: Double) = otherMass * surfaceGravity()
+    fun overflateGravitasjon() = G * masse / (radius * radius)
+    fun overflateVekt(masse: Double) = masse * overflateGravitasjon()
 }
 
-// Enum som implementerer interface
-interface Describable {
-    fun describe(): String
+// Enum som implementerer interface (hver konstant overstyrer)
+interface Beskrivelse {
+    fun beskriv(): String
 }
 
-enum class Season : Describable {
-    SPRING { override fun describe() = "Blomster blomstrer" },
-    SUMMER { override fun describe() = "Sun shines" },
-    AUTUMN { override fun describe() = "Løv faller" },
-    WINTER { override fun describe() = "Snø faller" }
+enum class Årstid : Beskrivelse {
+    VÅR    { override fun beskriv() = "Blomster blomstrer" },
+    SOMMER { override fun beskriv() = "Sola skinner" },
+    HØST   { override fun beskriv() = "Løv faller" },
+    VINTER { override fun beskriv() = "Snø faller" }
 }
 
 fun main() {
-    // Iterere over entries
-    println("Retninger: ${Direction.entries.joinToString()}")
+    println("Retninger: ${Retning.entries.joinToString()}")
 
-    // valueOf — string til enum
-    val dir = Direction.valueOf("NORTH")
-    println("Tolket: $dir")
+    val d = Retning.valueOf("NORD")
+    println("Tolket: $d (indeks ${d.ordinal})")
 
-    // name og ordinal
-    println("${dir.name} har indeks ${dir.ordinal}")
-
-    // when med enum
-    val advice = when (dir) {
-        Direction.NORTH -> "Gå opp"
-        Direction.SOUTH -> "Gå ned"
-        Direction.EAST -> "Gå høyre"
-        Direction.WEST -> "Gå venstre"
+    val råd = when (d) {
+        Retning.NORD -> "Gå opp"
+        Retning.SØR  -> "Gå ned"
+        Retning.ØST  -> "Gå høyre"
+        Retning.VEST -> "Gå venstre"
     }
-    println(advice)
+    println("Råd: $råd")
 
-    // Enum med properties
-    val earthWeight = 75.0
-    println("\nVekt på andre planeter (hvis du veier $earthWeight kg på jorden):")
-    Planet.entries.forEach { planet ->
-        println("  ${planet.name}: %.2f kg".format(planet.surfaceWeight(earthWeight)))
+    val jordvekt = 75.0
+    println("\nVekt på andre planeter (du veier $jordvekt kg på jorda):")
+    Planet.entries.forEach { p ->
+        println("  ${p.name}: %.2f kg".format(p.overflateVekt(jordvekt)))
     }
 
-    // Enum med interface
     println("\nÅrstider:")
-    Season.entries.forEach { println("  ${it.name}: ${it.describe()}") }
+    Årstid.entries.forEach { println("  ${it.name}: ${it.beskriv()}") }
 }
-
-

@@ -1,24 +1,30 @@
 package org.example.basis
 
-interface  NumberWrapper<Int>
-interface IntWrapper : NumberWrapper<Int>
+/**
+ * Main — innstegspunktet for basis-pakken
+ *
+ * Dekker:
+ *  - Hvordan en Kotlin-app starter: fun main() som top-level funksjon
+ *  - val (read-only) vs var (muterbar)
+ *  - Enkel string template: "Hei, $navn"
+ *  - En enkel for-løkke over et range
+ *
+ * Bruk når: du vil se det minste mulige kjørbare Kotlin-programmet.
+ * Alle andre filer i dette prosjektet har også sin egen main(), slik at
+ * hver fil kan kjøres selvstendig.
+ *
+ * Docs: https://kotlinlang.org/docs/basic-syntax.html
+ */
 
-class StringWrapper : NumberWrapper<String>{
-    constructor()
-}
-
-//TIP For å <b>kjøre</b> kode, trykk <shortcut actionId="Run"/> eller
-// klikk på <icon src="AllIcons.Actions.Execute"/>-ikonet i margen.
 fun main() {
-    val name = "Kotlin"
-    //TIP Trykk <shortcut actionId="ShowIntentionActions"/> med markøren på den uthevede teksten
-    // for å se hvordan IntelliJ IDEA foreslår å fikse det.
-    println("Hei, " + name + "!")
+    val navn: String = "Kotlin"      // val = uforanderlig, må settes én gang
+    var teller: Int = 0              // var = kan endres senere
+    println("Hei, $navn!")           // string template med $variabel
 
     for (i in 1..5) {
-        //TIP Trykk <shortcut actionId="Debug"/> for å starte feilsøking. Ett <icon src="AllIcons.Debugger.Db_set_breakpoint"/>-breakpoint er allerede satt
-        // men du kan legge til flere ved å trykke <shortcut actionId="ToggleLineBreakpoint"/>.
-        println("i = $i")
+        teller += i                  // akkumulerer 1+2+3+4+5 = 15
+        println("  i = $i (teller = $teller)")
     }
-}
 
+    println("Summen fra 1 til 5 er $teller")
+}

@@ -1,59 +1,66 @@
 package org.example.advanced
 
-// Labels og qualified returns — kontroll over nøstede løkker og lambdaer
+/**
+ * LabelsAndReturns — labels og qualified returns
+ *
+ * Dekker:
+ *  - return@lambdaName for å returnere fra en lambda (ikke ytre funksjon)
+ *  - Custom labels (myLoop@)
+ *  - break@ og continue@ i nøstede løkker
+ *  - return@run, return@let
+ *
+ * Bruk når: du har nøstede lambdaer eller løkker og trenger å være
+ * spesifikk om hvilken du returnerer fra.
+ *
+ * NB: "Bare return" i en lambda betyr return fra den YTRE funksjonen,
+ *     ikke fra lambda. Bruk return@lambdaName for lokal retur.
+ *
+ * Docs: https://kotlinlang.org/docs/returns.html
+ */
 
 fun main() {
-    // return@forEach — returner fra lambda, ikke fra main
-    println("=== return@forEach ===")
+    println("=== return@forEach (hopper over 3) ===")
     listOf(1, 2, 3, 4, 5).forEach {
-        if (it == 3) return@forEach  // hopper over 3, fortsetter med 4
-        println(it)
+        if (it == 3) return@forEach  // hopper bare over 3
+        println("  $it")
     }
-    println("Etter forEach")  // denne kjøres
+    println("  Etter forEach")
 
-    // return (uten label) i forEach ville returnert fra main!
-    // listOf(1,2,3).forEach { if (it == 2) return }  // returnerer fra main
-
-    // return@label — custom label
-    println("\n=== tilpasset label ===")
+    println("\n=== Custom label ===")
     listOf(1, 2, 3, 4, 5).forEach myLoop@{
         if (it == 3) return@myLoop
-        println(it)
+        println("  $it")
     }
 
-    // break/continue med labels i nøstede løkker
-    println("\n=== break@outer ===")
-    outer@ for (i in 1..3) {
+    println("\n=== break@ytre i nøstet løkke ===")
+    ytre@ for (i in 1..3) {
         for (j in 1..3) {
-            if (i == 2 && j == 2) break@outer  // bryter ut av YTRE løkke
-            println("$i,$j")
+            if (i == 2 && j == 2) break@ytre
+            println("  $i,$j")
         }
     }
 
-    println("\n=== continue@outer ===")
-    outer@ for (i in 1..3) {
+    println("\n=== continue@ytre ===")
+    ytre@ for (i in 1..3) {
         for (j in 1..3) {
-            if (j == 2) continue@outer  // hopper til neste iterasjon av YTRE løkke
-            println("$i,$j")
+            if (j == 2) continue@ytre
+            println("  $i,$j")
         }
     }
 
-    // Forskjell: run med lambda — return@run returnerer verdien
     println("\n=== return@run ===")
-    val result = run {
+    val resultat = run {
         val x = 10
-        if (x > 5) return@run "big"
-        "small"  // dette er siste uttrykk, men return@run "big" kjører
+        if (x > 5) return@run "stor"
+        "liten"
     }
-    println("Result: $result")
+    println("  $resultat")
 
-    // let med return@let
-    val value: String? = "hello"
-    val processed = value?.let {
+    println("\n=== return@let ===")
+    val verdi: String? = "hei"
+    val behandlet = verdi?.let {
         if (it.length < 3) return@let "for kort"
         it.uppercase()
     }
-    println("Processed: $processed")
+    println("  $behandlet")
 }
-
-

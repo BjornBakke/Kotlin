@@ -1,59 +1,68 @@
 package org.example.advanced
 
-// vararg — variabelt antall argumenter
+/**
+ * Varargs — variabelt antall argumenter og spread-operatoren
+ *
+ * Dekker:
+ *  - `vararg` på en parameter — funksjonen kan kalles med 0..N argumenter
+ *  - vararg oppfører seg som en Array<T> inne i funksjonen
+ *  - `*`-operatoren (spread) — spre en eksisterende array inn som vararg-argumenter
+ *  - Kombinere vararg med andre parametere og med trailing lambda
+ *  - For Int/Long/Double osv. brukes primitiv-arrays (IntArray, LongArray, ...)
+ *
+ * Bruk når: du vil ha et ergonomisk kall-sted a la printf/println i stedet for
+ *  å tvinge brukeren til å lage en liste eller array.
+ *
+ * NB: Hvis du har både vararg og andre parametere, må ikke-vararg-parametere
+ *  oppgis som navngitte argumenter _hvis_ de kommer etter vararg.
+ *  I praksis settes vararg som siste parameter (før en evt. trailing lambda).
+ *
+ * Docs: https://kotlinlang.org/docs/functions.html#variable-number-of-arguments-varargs
+ */
 
-fun printAll(vararg items: String) {
-    for (item in items) {
-        println("  $item")
-    }
+// Enkel vararg: funksjonen kan ta 0..N strenger
+private fun skrivAlle(vararg elementer: String) {
+    for (e in elementer) println("  $e")
 }
 
-// vararg med andre parametere
-fun log(level: String, vararg messages: String) {
-    messages.forEach { println("[$level] $it") }
+// vararg kan kombineres med andre parametere
+private fun logg(nivå: String, vararg meldinger: String) {
+    meldinger.forEach { println("[$nivå] $it") }
 }
 
-// vararg med trailing lambda
-fun <T> buildList(vararg items: T, transform: (T) -> String = { it.toString() }): List<String> {
-    return items.map(transform)
-}
+// vararg + trailing lambda
+private fun <T> byggListe(vararg elementer: T, transform: (T) -> String = { it.toString() }): List<String> =
+    elementer.map(transform)
 
-// vararg er egentlig en Array<T> inne i funksjonen
-fun sumAll(vararg numbers: Int): Int = numbers.sum()
+// Inne i funksjonen er `tall` en IntArray
+private fun summer(vararg tall: Int): Int = tall.sum()
 
 fun main() {
-    // Enkel vararg
-    println("=== printAll ===")
-    printAll("Hei", "Verden", "Kotlin")
+    println("=== Enkel vararg ===")
+    skrivAlle("Hei", "Verden", "Kotlin")
 
-    // vararg med navngitt parameter
-    println("\n=== logg ===")
-    log("INFO", "Starter app", "Laster konfigurasjon", "Ready")
-    log("ERROR", "Tilkobling feilet")
+    println("\n=== vararg med annen parameter ===")
+    logg("INFO", "Starter app", "Laster konfigurasjon", "Klar")
+    logg("FEIL", "Tilkobling feilet")
 
-    // Spread operator * — sender array som vararg
-    println("\n=== spread-operator ===")
-    val words = arrayOf("one", "two", "three")
-    printAll(*words)  // sprer arrayet til individuelle argumenter
+    println("\n=== Spread-operatoren (*) ===")
+    val ord = arrayOf("en", "to", "tre")
+    skrivAlle(*ord)  // sprer arrayet til individuelle argumenter
 
-    // Kombinere spread med enkelt-argumenter
-    printAll("zero", *words, "four")
+    // Tip: du kan kombinere spread med vanlige argumenter
+    skrivAlle("null", *ord, "fire")
 
-    // vararg som Array
-    println("\n=== summerAlle ===")
-    println("Sum: ${sumAll(1, 2, 3, 4, 5)}")
+    println("\n=== vararg som array i funksjonen ===")
+    println("  Sum av 1..5: ${summer(1, 2, 3, 4, 5)}")
 
-    val nums = intArrayOf(10, 20, 30)
-    println("Sum fra tabell: ${sumAll(*nums)}")
+    // For primitive typer trengs IntArray (ikke Array<Int>)
+    val tall = intArrayOf(10, 20, 30)
+    println("  Sum fra IntArray: ${summer(*tall)}")
 
-    // buildList med transform
-    println("\n=== byggListe ===")
-    val result = buildList(1, 2, 3) { "Item #$it" }
-    println(result)
+    println("\n=== vararg + trailing lambda ===")
+    val transformert = byggListe(1, 2, 3) { "Element #$it" }
+    println("  $transformert")
 
-    val simple = buildList("a", "b", "c")
-    println(simple)
+    val enkelt = byggListe("a", "b", "c")
+    println("  $enkelt")
 }
-
-
-

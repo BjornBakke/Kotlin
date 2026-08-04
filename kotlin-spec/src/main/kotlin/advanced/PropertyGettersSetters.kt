@@ -1,14 +1,32 @@
 package org.example.advanced
 
-// const val — kompileringstidskonstant (kun top-level eller i companion/object)
-const val MAX_NAME_LENGTH = 50
+/**
+ * PropertyGettersSetters — custom getters/setters og computed properties
+ *
+ * Dekker:
+ *  - Custom setter med validering (field = backing field)
+ *  - Read-only computed property (ingen backing field)
+ *  - Property med private setter
+ *  - const val — compile-time konstant
+ *
+ * Bruk når: du vil legge logikk inn i property-tilgang uten å bryte
+ * kallsyntaxen (obj.verdi i stedet for obj.getVerdi()).
+ *
+ * NB: 'field' er et spesielt nøkkelord som refererer til backing-feltet
+ *     inni getter/setter. Det er det eneste stedet du kan bruke det.
+ *
+ * Docs: https://kotlinlang.org/docs/properties.html
+ */
 
-class Temperature(celsius: Double) {
-    // Custom getter — computed property (lagrer ikke verdi)
+// const val = kompileringstidskonstant (bare top-level eller i companion/object)
+const val MAX_NAVN_LENGDE = 50
+
+class Temperatur(celsius: Double) {
+    // Custom setter med validering
     var celsius: Double = celsius
         set(value) {
             require(value >= -273.15) { "Under absolutt nullpunkt!" }
-            field = value  // 'field' = backing field
+            field = value  // field = backing field
         }
 
     // Read-only computed property — ingen backing field
@@ -18,80 +36,73 @@ class Temperature(celsius: Double) {
     val kelvin: Double
         get() = celsius + 273.15
 
-    val description: String
+    val beskrivelse: String
         get() = when {
-            celsius < 0 -> "Freezing"
-            celsius < 20 -> "Cold"
-            celsius < 30 -> "Pleasant"
-            else -> "Hot"
+            celsius < 0  -> "frysende"
+            celsius < 20 -> "kaldt"
+            celsius < 30 -> "behagelig"
+            else         -> "varmt"
         }
 }
 
-class User(val name: String) {
-    // Property med custom setter og logging
-    var email: String = ""
+class Bruker(val navn: String) {
+    // Setter med logging og normalisering
+    var epost: String = ""
         set(value) {
-            println("  E-post endret: '$field' -> '$value'")
+            println("  e-post endret: '$field' -> '$value'")
             field = value.lowercase().trim()
         }
 
-    // Lazy-lignende manuelt (se Delegation.kt for ekte lazy)
-    private var _displayName: String? = null
-    val displayName: String
+    // Manuell lazy via backing field
+    private var _visningsNavn: String? = null
+    val visningsNavn: String
         get() {
-            if (_displayName == null) {
-                _displayName = name.replaceFirstChar { it.uppercase() }
-                println("  Computed displayName: $_displayName")
+            if (_visningsNavn == null) {
+                _visningsNavn = navn.replaceFirstChar { it.uppercase() }
+                println("  beregnet visningsNavn: $_visningsNavn")
             }
-            return _displayName!!
+            return _visningsNavn!!
         }
 }
 
-// Private setter — kan leses utenfor, men kun settes internt
-class Counter {
-    var count: Int = 0
+// Private setter — lesbar utenfra, skrivbar kun innenfra
+class Teller {
+    var antall: Int = 0
         private set
-
-    fun increment() { count++ }
-    fun reset() { count = 0 }
+    fun øk() { antall++ }
+    fun nullstill() { antall = 0 }
 }
 
 fun main() {
-    val temp = Temperature(20.0)
-    println("${temp.celsius}°C = ${temp.fahrenheit}°F = ${temp.kelvin}K")
-    println("Beskrivelse: ${temp.description}")
+    val t = Temperatur(20.0)
+    println("=== Computed properties ===")
+    println("  ${t.celsius}°C = ${t.fahrenheit}°F = ${t.kelvin}K")
+    println("  beskrivelse: ${t.beskrivelse}")
 
-    temp.celsius = 35.0
-    println("${temp.celsius}°C = ${temp.fahrenheit}°F — ${temp.description}")
+    t.celsius = 35.0
+    println("  ${t.celsius}°C — ${t.beskrivelse}")
 
-    // Custom setter validering
+    println("\n=== Setter-validering ===")
     try {
-        temp.celsius = -300.0  // under absolutt nullpunkt
+        t.celsius = -300.0
     } catch (e: IllegalArgumentException) {
-        println("Feil: ${e.message}")
+        println("  avvist: ${e.message}")
     }
 
-    println()
+    println("\n=== Setter med logging + normalisering ===")
+    val b = Bruker("alice")
+    b.epost = "  ALICE@Example.COM  "
+    println("  e-post: ${b.epost}")
 
-    // Custom setter med logging
-    val user = User("alice")
-    user.email = "  ALICE@Example.COM  "
-    println("Email: ${user.email}")  // alice@example.com
+    println("\n=== Manuell lazy ===")
+    println("  ${b.visningsNavn}")  // beregnes
+    println("  ${b.visningsNavn}")  // cached
 
-    // Computed property (lazy-manuelt)
-    println("Visning: ${user.displayName}")  // beregnes første gang
-    println("Visning: ${user.displayName}")  // cached
+    println("\n=== Private setter ===")
+    val teller = Teller()
+    teller.øk(); teller.øk()
+    println("  antall: ${teller.antall}")
+    // teller.antall = 99  // FEIL — private set
 
-    println()
-
-    // Private setter
-    val counter = Counter()
-    counter.increment()
-    counter.increment()
-    println("Antall: ${counter.count}")
-    // counter.count = 99  // FEIL — setter er private
-
-    println("MAX_NAME_LENGTH = $MAX_NAME_LENGTH")
+    println("\nMAX_NAVN_LENGDE (const val) = $MAX_NAVN_LENGDE")
 }
-
-

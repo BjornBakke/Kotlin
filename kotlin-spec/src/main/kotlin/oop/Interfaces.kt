@@ -1,54 +1,72 @@
 package org.example.oop
 
-// Interface med default-metode og abstrakt property
-interface Printable {
-    val label: String  // abstrakt property — må implementeres
-    fun print() = println("Skriver ut: $label")  // default implementering
+/**
+ * Interfaces — kontrakter som klasser kan implementere
+ *
+ * Dekker:
+ *  - Interface med abstrakte og default-metoder
+ *  - Abstrakte properties i interface
+ *  - Multippel implementering
+ *  - Konfliktløsning med super<Type>.metode()
+ *  - Generisk interface (Repository<T>)
+ *
+ * Bruk når: du vil definere hva en type KAN gjøre uten å binde deg til
+ * implementasjon. Interfaces støtter multippel arv av oppførsel.
+ *
+ * NB: Interfaces kan ikke holde tilstand (ingen backing fields) — bare
+ *     abstrakte properties eller properties med getter/setter-logikk.
+ *
+ * Docs: https://kotlinlang.org/docs/interfaces.html
+ */
+
+interface Skrivbar {
+    val etikett: String                       // abstrakt property
+    fun skriv() = println("Skriver ut: $etikett")  // default-implementasjon
 }
 
-interface Loggable {
-    fun log() = println("Logget ved ${System.currentTimeMillis()}")
-    fun print() = println("Logg-utskrift")  // bevisst navnekonflikt med Printable
+interface Loggbar {
+    fun logg() = println("Logget ved ${System.currentTimeMillis()}")
+    fun skriv() = println("Logg-utskrift")    // bevisst navnekollisjon
 }
 
-// Multippel implementering — løser konflikt med super<I>
-class Report(override val label: String) : Printable, Loggable {
-    // Må override print() fordi begge interfaces har den
-    override fun print() {
-        super<Printable>.print()  // velger Printable sin versjon
-        super<Loggable>.log()     // kaller Loggable sin log() i tillegg
+// Multippel implementering — konflikt løses med super<I>
+class Rapport(override val etikett: String) : Skrivbar, Loggbar {
+    // Må override når flere interfaces har samme default-metode
+    override fun skriv() {
+        super<Skrivbar>.skriv()  // kall Skrivbar sin versjon
+        super<Loggbar>.logg()    // og Loggbar sin logg
     }
 }
 
-// Interface med abstrakt metode
+// Generisk interface
 interface Repository<T> {
-    fun findById(id: Int): T?
-    fun findAll(): List<T>
-    fun save(item: T)
+    fun finnMedId(id: Int): T?
+    fun finnAlle(): List<T>
+    fun lagre(element: T)
 }
 
-data class Product(val id: Int, val name: String, val price: Double)
+data class Produkt(val id: Int, val navn: String, val pris: Double)
 
-class InMemoryProductRepo : Repository<Product> {
-    private val store = mutableMapOf<Int, Product>()
+class InMemoryProduktRepo : Repository<Produkt> {
+    private val lager = mutableMapOf<Int, Produkt>()
 
-    override fun findById(id: Int) = store[id]
-    override fun findAll() = store.values.toList()
-    override fun save(item: Product) { store[item.id] = item }
+    override fun finnMedId(id: Int) = lager[id]
+    override fun finnAlle() = lager.values.toList()
+    override fun lagre(element: Produkt) { lager[element.id] = element }
 }
 
 fun main() {
-    val report = Report("Q4 Sales")
-    report.print()
-    // Printing: Q4 Sales
-    // Logged at ...
+    val rapport = Rapport("Q4 salg")
+    rapport.skriv()
+    // Skriver ut: Q4 salg
+    // Logget ved ...
 
-    // Interface som type
-    val repo: Repository<Product> = InMemoryProductRepo()
-    repo.save(Product(1, "Keyboard", 99.90))
-    repo.save(Product(2, "Mouse", 49.90))
-    println(repo.findAll())
-    println(repo.findById(1))
-    println(repo.findById(99))  // null
+    println()
+
+    val repo: Repository<Produkt> = InMemoryProduktRepo()
+    repo.lagre(Produkt(1, "Tastatur", 99.90))
+    repo.lagre(Produkt(2, "Mus", 49.90))
+    println("Alle: ${repo.finnAlle()}")
+    println("id=1:  ${repo.finnMedId(1)}")
+    println("id=99: ${repo.finnMedId(99)}")
 }
-

@@ -1,53 +1,57 @@
 package org.example.functional
 
-// :: operator — referanse til funksjon (i stedet for lambda)
+/**
+ * FunctionReferences — referanse til funksjon i stedet for lambda
+ *
+ * Dekker:
+ *  - ::funksjon for top-level funksjonsreferanse
+ *  - ::Constructor for referanse til constructor
+ *  - Bundet referanse: instans::metode
+ *  - Klasse::metode (ubundet, tar instans som første arg)
+ *
+ * Bruk når: du allerede har en funksjon med riktig signatur og vil sende
+ * den som parameter uten å pakke inn i { arg -> funksjon(arg) }.
+ *
+ * NB: ::funksjon og { funksjon(it) } er nesten identiske, men
+ *     funksjonsreferanse er litt raskere (ingen ekstra wrapping).
+ *
+ * Docs: https://kotlinlang.org/docs/reflection.html#function-references
+ */
 
-fun isEven(n: Int) = n % 2 == 0
-fun square(n: Int) = n * n
-fun greet(name: String) = "Hei, $name!"
+private fun erPartall(n: Int) = n % 2 == 0
+private fun kvadrer(n: Int) = n * n
+private fun hils(navn: String) = "Hei, $navn!"
 
-data class User(val name: String, val age: Int) {
-    fun introduce() = "Jeg er $name, $age år gammel"
+data class Profil(val navn: String, val alder: Int) {
+    fun presenter() = "Jeg er $navn, $alder år gammel"
 }
 
 fun main() {
-    val numbers = listOf(1, 2, 3, 4, 5, 6)
+    val tall = listOf(1, 2, 3, 4, 5, 6)
 
-    // ::funksjon — referanse til top-level funksjon
-    println(numbers.filter(::isEven))    // [2, 4, 6]
-    println(numbers.map(::square))       // [1, 4, 9, 16, 25, 36]
+    println("=== ::funksjon — top-level referanse ===")
+    println("  partall: ${tall.filter(::erPartall)}")
+    println("  kvadrat: ${tall.map(::kvadrer)}")
 
-    val names = listOf("Alice", "Bob")
-    println(names.map(::greet))  // [Hello, Alice!, Hello, Bob!]
+    val navn = listOf("Alice", "Bob")
+    println("  ${navn.map(::hils)}")
 
-    // ::Constructor — referanse til constructor
-    val pairs = listOf("Alice" to 30, "Bob" to 25)
-    val users = pairs.map { (name, age) -> User(name, age) }
-    println(users)
+    println("\n=== ::Constructor ===")
+    val par = listOf("Alice" to 30, "Bob" to 25)
+    val profiler = par.map { (n, a) -> Profil(n, a) }
+    println("  $profiler")
 
-    // Bound reference — referanse bundet til en spesifikk instans
-    val user = User("Carol", 28)
-    val intro = user::introduce  // bundet til 'user'
-    println(intro())  // I'm Carol, 28 years old
+    println("\n=== Bundet referanse (instans::metode) ===")
+    val profil = Profil("Clara", 28)
+    val presenter = profil::presenter
+    println("  ${presenter()}")
 
-    // Bound reference til property
-    val getName = user::name  // KProperty referanse
-    // println(getName.get())
+    println("\n=== Metoder på eksisterende typer ===")
+    val ord = listOf("  hallo  ", "  verden  ")
+    println("  trim:      ${ord.map(String::trim)}")
+    println("  uppercase: ${ord.map(String::uppercase)}")
 
-    // Bruke String metoder som referanse
-    val words = listOf("  hallo  ", "  verden  ")
-    println(words.map(String::trim))  // [hello, world]
-    println(words.map(String::uppercase))
-
-    // Referanse til extension function
-    fun String.exclaim() = "$this!"
-    val items = listOf("wow", "cool")
-    // Bruk lambda i stedet for referanse for local extensions
-    println(items.map { it.exclaim() })
-
-    // Sammenligning: lambda vs function reference
-    println(numbers.filter { isEven(it) })   // lambda
-    println(numbers.filter(::isEven))         // function reference — kortere
+    println("\n=== Sammenligning: lambda vs referanse ===")
+    println("  lambda:    ${tall.filter { erPartall(it) }}")
+    println("  referanse: ${tall.filter(::erPartall)}")
 }
-
-

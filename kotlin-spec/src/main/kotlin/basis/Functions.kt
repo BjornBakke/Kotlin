@@ -2,77 +2,81 @@ package org.example.basis
 
 import kotlin.math.PI
 
-fun hello() {
-    return println("Hei, verden!")
+/**
+ * Functions — funksjonsdeklarering, parametere og returverdier
+ *
+ * Dekker:
+ *  - Top-level funksjoner uten klasse
+ *  - Named arguments og default-verdier
+ *  - Single-expression funksjoner (= i stedet for { })
+ *  - Unit (tilsvarer void) som implisitt returverdi
+ *  - Early return med tidlig utgang fra en funksjon
+ *
+ * Bruk når: du vil definere gjenbrukbar logikk. I Kotlin kan funksjoner
+ * stå på top-level — klasse er ikke påkrevd slik det er i Java.
+ *
+ * NB: Named arguments gjør kall lesbare når du har flere parametere:
+ *     intervallISekunder(timer = 2, sekunder = 30).
+ *
+ * Docs: https://kotlinlang.org/docs/functions.html
+ */
+
+// Unit-returnerende funksjon (print har type Unit)
+fun skrivMelding(melding: String) {
+    println(melding)
 }
+
+// Funksjon med default-parameter
+fun skrivMeldingMedPrefix(melding: String, prefix: String = "default") {
+    println("[$prefix] $melding")
+}
+
+// Single-expression funksjon
+fun summer(x: Int, y: Int) = x + y
+
+// Funksjon med returverdi og early return
+fun registrerBruker(
+    brukernavn: String,
+    epost: String,
+    eksisterendeBrukernavn: Set<String>,
+    eksisterendeEposter: Set<String>
+): String {
+    if (brukernavn in eksisterendeBrukernavn) {
+        return "Brukernavn er opptatt. Velg et annet."
+    }
+    if (epost in eksisterendeEposter) {
+        return "E-post er allerede registrert."
+    }
+    return "Bruker registrert: $brukernavn"
+}
+
+// Single-expression med type-slutning
+fun sirkelAreal(radius: Int): Double = PI * radius * radius
+
+// Flere default-verdier
+fun intervallISekunder(timer: Int = 0, minutter: Int = 0, sekunder: Int = 0) =
+    ((timer * 60) + minutter) * 60 + sekunder
 
 fun main() {
-    hello()
-    printMessageWithPrefix(prefix = "Log", message = "Hei")
-    printMessageWithPrefix("Hei")
-    val unit = printMessage("Hei")
-    println(unit)
-    // Hello, world!
-    println(sum(1, 2))
+    skrivMelding("Hei, verden!")
 
-    println(registerUser("john_doe", "newjohn@example.com"))
-    // Brukernavn er opptatt. Velg et annet brukernavn.
-    println(registerUser("new_user", "newuser@example.com"))
-    // User registered successfully: new_user
-    println(circleArea(2))
-    main22()
+    // Named arguments lar deg hoppe over parametere og gjør kall lesbare
+    skrivMeldingMedPrefix(prefix = "Log", melding = "Sjekker tilkobling")
+    skrivMeldingMedPrefix("Uten prefix")  // bruker default
+
+    // Enkel funksjon med returverdi
+    println("1 + 2 = ${summer(1, 2)}")
+
+    // Registrering (tester begge return-grener)
+    val brukernavn = setOf("john_doe", "jane_smith")
+    val eposter = setOf("john@example.com", "jane@example.com")
+    println(registrerBruker("john_doe", "ny@example.com", brukernavn, eposter))
+    println(registrerBruker("ny_bruker", "ny@example.com", brukernavn, eposter))
+
+    println("Areal av sirkel med r=2: ${sirkelAreal(2)}")
+
+    // Default + named argument-kombinasjoner
+    println(intervallISekunder(1, 20, 15))               // 4815
+    println(intervallISekunder(minutter = 1, sekunder = 25))  // 85
+    println(intervallISekunder(timer = 2))                // 7200
 }
-
-fun printMessageWithPrefix(message: String, prefix: String = "default") {
-    println("[$prefix] $message")
-}
-
-fun printMessage(message: String) {
-    println(message)
-    // `return Unit` or `return` is optional
-}
-
-fun sum(x: Int, y: Int) = x + y
-
-
-// A list of registered usernames
-val registeredUsernames = mutableListOf("john_doe", "jane_smith")
-
-// A list of registered emails
-val registeredEmails = mutableListOf("john@example.com", "jane@example.com")
-
-fun registerUser(username: String, email: String): String {
-    // Early return if the username is already taken
-    if (username in registeredUsernames) {
-        return "Brukernavn er opptatt. Velg et annet brukernavn."
-    }
-
-    // Early return if the email is already registered
-    if (email in registeredEmails) {
-        return "E-post er allerede registrert. Bruk en annen e-postadresse."
-    }
-
-    // Proceed with the registration if the username and email are not taken
-    registeredUsernames.add(username)
-    registeredEmails.add(email)
-
-    return "Bruker registrert: $username"
-}
-
-fun circleArea(radius: Int): Double {
-
-    return PI * radius * radius
-}
-
-fun intervalInSeconds(hours: Int = 0, minutes: Int = 0, seconds: Int = 0) =
-    ((hours * 60) + minutes) * 60 + seconds
-
-fun main22() {
-    println(intervalInSeconds(1, 20, 15))
-    println(intervalInSeconds(minutes = 1, seconds = 25))
-    println(intervalInSeconds(hours = 2))
-    println(intervalInSeconds(minutes = 10))
-    println(intervalInSeconds(hours = 1, seconds = 1))
-}
-
-

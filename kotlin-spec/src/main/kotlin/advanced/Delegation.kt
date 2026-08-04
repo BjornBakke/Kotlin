@@ -2,89 +2,100 @@ package org.example.advanced
 
 import kotlin.properties.Delegates
 
-// lazy {} — beregnes ved første tilgang, caches deretter
-class ExpensiveResource {
+/**
+ * Delegation — property delegation i Kotlin
+ *
+ * Dekker:
+ *  - by lazy { } — beregn én gang, cache deretter
+ *  - Delegates.observable — callback ved hver endring
+ *  - Delegates.vetoable — callback som kan avvise endring
+ *  - Egen delegate — implementer getValue/setValue
+ *  - by map — lesing/skriving via en Map
+ *
+ * Bruk når: du vil gjenbruke property-logikk uten å kopiere. Vanlige
+ * mønstre: lazy init, logging, validering, binding til ekstern kilde.
+ *
+ * NB: lazy er trådsikker som default (SYNCHRONIZED). For single-threaded
+ *     bruk: by lazy(LazyThreadSafetyMode.NONE) { ... } er litt raskere.
+ *
+ * Docs: https://kotlinlang.org/docs/delegated-properties.html
+ */
+
+// lazy: beregnes ved første tilgang, caches
+class DyrRessurs {
     val data: String by lazy {
-        println("  Beregner data... (kun én gang)")
+        println("  beregner data… (kun én gang)")
         "dyrt resultat"
     }
 }
 
-// Delegates.observable — kjører callback ved endring
-class UserProfile {
-    var name: String by Delegates.observable("unnamed") { _, old, new ->
-        println("  Navn endret: '$old' -> '$new'")
+// observable: kjører callback ved hver endring
+class BrukerProfil {
+    var navn: String by Delegates.observable("uten navn") { _, gammel, ny ->
+        println("  navn endret: '$gammel' -> '$ny'")
     }
 }
 
-// Delegates.vetoable — kan avvise endring
-class BoundedValue {
-    var score: Int by Delegates.vetoable(0) { _, _, new ->
-        new in 0..100  // returnerer false = avviser endringen
+// vetoable: kan avvise endring
+class AvgrensetVerdi {
+    var poeng: Int by Delegates.vetoable(0) { _, _, ny ->
+        ny in 0..100  // false = avvises
     }
 }
 
-// Custom delegate — implementer getValue/setValue
-class LoggingDelegate<T>(private var value: T) {
-    operator fun getValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>): T {
-        println("  GET ${property.name} = $value")
-        return value
+// Custom delegate med getValue/setValue
+class LoggingDelegate<T>(private var verdi: T) {
+    operator fun getValue(ref: Any?, prop: kotlin.reflect.KProperty<*>): T {
+        println("  GET ${prop.name} = $verdi")
+        return verdi
     }
-
-    operator fun setValue(thisRef: Any?, property: kotlin.reflect.KProperty<*>, newValue: T) {
-        println("  SET ${property.name}: $value -> $newValue")
-        value = newValue
+    operator fun setValue(ref: Any?, prop: kotlin.reflect.KProperty<*>, ny: T) {
+        println("  SET ${prop.name}: $verdi -> $ny")
+        verdi = ny
     }
 }
 
-class Config {
+class Konfig {
     var host: String by LoggingDelegate("localhost")
     var port: Int by LoggingDelegate(8080)
 }
 
-// by map — delegere til Map (nyttig for JSON-lignende data)
-class MapUser(map: Map<String, Any?>) {
-    val name: String by map
-    val age: Int by map
-    val email: String by map
+// by map — delegere til en Map (praktisk for JSON-lignende data)
+class MapBruker(kart: Map<String, Any?>) {
+    val navn: String  by kart
+    val alder: Int    by kart
+    val epost: String by kart
 }
 
 fun main() {
-    // lazy
     println("=== lazy ===")
-    val resource = ExpensiveResource()
-    println("Før tilgang")
-    println(resource.data)  // beregner her
-    println(resource.data)  // returnerer cached verdi
+    val r = DyrRessurs()
+    println("  før tilgang")
+    println("  ${r.data}")  // beregner her
+    println("  ${r.data}")  // cached
 
-    // observable
-    println("\n=== observerbar ===")
-    val profile = UserProfile()
-    profile.name = "Alice"
-    profile.name = "Bob"
+    println("\n=== observable ===")
+    val p = BrukerProfil()
+    p.navn = "Alice"
+    p.navn = "Bob"
 
-    // vetoable
-    println("\n=== kan-avvises ===")
-    val bounded = BoundedValue()
-    bounded.score = 85
-    println("Poeng: ${bounded.score}")  // 85
-    bounded.score = 150  // avvist!
-    println("Poeng etter avvist endring: ${bounded.score}")  // fortsatt 85
-    bounded.score = -10  // avvist!
-    println("Poeng etter avvist endring: ${bounded.score}")  // fortsatt 85
+    println("\n=== vetoable ===")
+    val a = AvgrensetVerdi()
+    a.poeng = 85
+    println("  poeng: ${a.poeng}")
+    a.poeng = 150  // avvises
+    println("  etter avvist 150: ${a.poeng}")
+    a.poeng = -10  // avvises
+    println("  etter avvist -10: ${a.poeng}")
 
-    // Custom delegate
-    println("\n=== tilpasset delegat ===")
-    val config = Config()
-    println("Host: ${config.host}")
-    config.host = "api.example.com"
-    config.port = 443
+    println("\n=== custom delegate ===")
+    val k = Konfig()
+    println("  host: ${k.host}")
+    k.host = "api.example.com"
+    k.port = 443
 
-    // by map
-    println("\n=== via map ===")
-    val userMap = mapOf("name" to "Charlie", "age" to 30, "email" to "charlie@test.com")
-    val user = MapUser(userMap)
-    println("${user.name}, ${user.age}, ${user.email}")
+    println("\n=== by map ===")
+    val kart = mapOf("navn" to "Clara", "alder" to 30, "epost" to "clara@test.no")
+    val mb = MapBruker(kart)
+    println("  ${mb.navn}, ${mb.alder}, ${mb.epost}")
 }
-
-

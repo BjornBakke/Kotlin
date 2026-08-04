@@ -1,60 +1,74 @@
 package org.example.advanced
 
-// lateinit var — deklarerer variabel uten å initialisere den med en gang
-// Brukes når initialisering skjer senere (f.eks. dependency injection, setup)
-// Kun: var (ikke val), ikke-null type, ikke primitiv (Int, Boolean, etc.)
+/**
+ * LateinitVar — sen initialisering av non-null property
+ *
+ * Dekker:
+ *  - lateinit var — ikke initialisert med en gang, ikke-null type
+ *  - ::property.isInitialized — sjekk om satt
+ *  - UninitializedPropertyAccessException hvis lest før sett
+ *
+ * Bruk når: et felt må initialiseres via dependency injection eller test-
+ * setup (f.eks. @Autowired, @BeforeEach), men du vet det er satt før bruk.
+ *
+ * NB: lateinit virker IKKE for:
+ *   - val (bare var)
+ *   - nullable typer (bruk null-initialisering)
+ *   - primitives (Int, Boolean, Double) — bruk Delegates.notNull()
+ *
+ * Docs: https://kotlinlang.org/docs/properties.html#late-initialized-properties-and-variables
+ */
 
-class Service {
-    lateinit var repository: String  // initialiseres senere
+class Tjeneste {
+    lateinit var repo: String
 
-    fun setup(repo: String) {
-        repository = repo
+    fun konfigurer(verdi: String) {
+        repo = verdi
     }
 
-    fun doWork(): String {
-        // Sjekk om initialisert med ::property.isInitialized
-        if (!::repository.isInitialized) {
+    fun gjørJobb(): String {
+        // Idiomatisk sjekk før bruk
+        if (!::repo.isInitialized) {
             return "Ikke initialisert!"
         }
-        return "Jobber med $repository"
+        return "Jobber med $repo"
     }
 }
 
-class TestFramework {
-    lateinit var testName: String
+class TestRammeverk {
+    lateinit var testNavn: String
     lateinit var testData: List<String>
 
-    fun beforeEach(name: String) {
-        testName = name
+    fun førHver(navn: String) {
+        testNavn = navn
         testData = listOf("a", "b", "c")
     }
 
-    fun runTest() {
-        println("Kjører '$testName' med data: $testData")
+    fun kjørTest() {
+        println("  Kjører '$testNavn' med data: $testData")
     }
 }
 
 fun main() {
-    val service = Service()
+    val tjeneste = Tjeneste()
 
-    // Før initialisering
-    println(service.doWork())  // Not initialized!
+    println("=== Før init ===")
+    println("  ${tjeneste.gjørJobb()}")
 
-    // Etter initialisering
-    service.setup("PostgreSQL")
-    println(service.doWork())  // Working with PostgreSQL
+    println("\n=== Etter init ===")
+    tjeneste.konfigurer("PostgreSQL")
+    println("  ${tjeneste.gjørJobb()}")
 
-    // Aksess uten init kaster UninitializedPropertyAccessException
-    val bad = Service()
+    println("\n=== Tilgang uten init kaster exception ===")
+    val dårlig = Tjeneste()
     try {
-        println(bad.repository)  // krasjer!
+        println(dårlig.repo)
     } catch (e: UninitializedPropertyAccessException) {
-        println("Feil: ${e.message}")
+        println("  Feil: ${e.message}")
     }
 
-    // Test-lignende bruk
-    val test = TestFramework()
-    test.beforeEach("my test")
-    test.runTest()
+    println("\n=== Typisk test-setup-bruk ===")
+    val test = TestRammeverk()
+    test.førHver("min test")
+    test.kjørTest()
 }
-

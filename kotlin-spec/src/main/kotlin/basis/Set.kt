@@ -1,41 +1,41 @@
 package org.example.basis
 
+/**
+ * Set — uordnet samling av unike elementer
+ *
+ * Dekker:
+ *  - setOf(...) gir read-only Set<T>
+ *  - mutableSetOf(...) gir MutableSet<T>
+ *  - Duplikater fjernes automatisk
+ *  - in-operator for medlemssjekk
+ *
+ * Bruk når: du vil sjekke tilhørighet raskt og ikke trenger rekkefølge
+ * (f.eks. "hvilke roller har brukeren", "støttede protokoller").
+ *
+ * NB: Set er implementert som LinkedHashSet som default — iterasjon skjer
+ *     i innsettingsrekkefølge, men kontrakten garanterer ikke det.
+ *
+ * Docs: https://kotlinlang.org/docs/collections-overview.html#set
+ */
+
 fun main() {
-    // Read-only set
-    val readOnlyFruit = setOf("apple", "banana", "cherry", "cherry")
-    // Mutable set with explicit type declaration
-    val fruit: MutableSet<String> = mutableSetOf("apple", "banana", "cherry", "cherry")
+    // Read-only set — duplikater fjernes automatisk
+    val kunLesFrukt = setOf("eple", "banan", "kirsebær", "kirsebær")
+    println("kunLesFrukt: $kunLesFrukt  (duplikater fjernes)")
 
-    println(readOnlyFruit)
-    // [apple, banana, cherry]
+    // Mutable set
+    val frukt: MutableSet<String> = mutableSetOf("eple", "banan", "kirsebær")
+    println("Antall elementer: ${kunLesFrukt.count()}")
+    println("Inneholder 'banan'? ${"banan" in kunLesFrukt}")
 
-    val fruitLocked: Set<String> = fruit
-    println("Dette settet har ${readOnlyFruit.count()} elementer")
-    // This set has 3 items
-    println("banana" in readOnlyFruit)
-    // true
-    fruit.add("dragonfruit")    // Add "dragonfruit" to the set
-    println(fruit)              // [apple, banana, cherry, dragonfruit]
+    frukt.add("dragefrukt")
+    println("Etter add: $frukt")
 
-    fruit.remove("dragonfruit") // Remove "dragonfruit" from the set
-    println(fruit)              // [apple, banana, cherry]
-}
+    frukt.remove("dragefrukt")
+    println("Etter remove: $frukt")
 
-fun main2() {
-    val tall = 1..100
-    for (t in tall)
-        when {
-            t % 15 == 0 -> print("buss-fiss")
-            t % 3 == 0 -> print("fiss")
-            t % 5 == 0 -> print("buss")
-            else -> print("$t")
-        }
-
-}
-
-fun main3() {
-    val words = listOf("dinosaur", "limousine", "magazine", "language")
-    for (word in words) {
-        if ( word.startsWith("l"))  print("$word")
-    }
+    // Typisk bruk: allowliste
+    val støttet = setOf("HTTP", "HTTPS", "FTP")
+    val forespurt = "smtp"
+    println("Støttes '$forespurt'? ${forespurt.uppercase() in støttet}")
 }

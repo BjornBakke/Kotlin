@@ -1,45 +1,59 @@
 package org.example.functional
 
-// Sequences = lazy evaluering — elementer beregnes ett om gangen
-// Collections = eager — hele listen prosesseres i hvert steg
+/**
+ * Sequences — lat evaluering av sekvensoperasjoner
+ *
+ * Dekker:
+ *  - Sequence vs List: lat (lazy) vs umiddelbar (eager) evaluering
+ *  - asSequence() konverterer en collection til Sequence
+ *  - generateSequence for uendelige/beregnede sekvenser
+ *  - Terminale operasjoner trigger evaluering (toList, sum, first)
+ *
+ * Bruk når: datasettet er stort eller uendelig, eller du har mange
+ * sammenkoblede map/filter og vil unngå mellomliggende lister.
+ *
+ * NB: For små samlinger er List ofte raskere (mindre overhead). Lat
+ *     evaluering vinner først når kjeden er lang eller datasettet stort.
+ *
+ * Docs: https://kotlinlang.org/docs/sequences.html
+ */
 
 fun main() {
-    // Eager (List) — lager mellomliggende lister for hvert steg
-    val eagerResult = listOf(1, 2, 3, 4, 5)
-        .map { println("  ivrig map $it"); it * 2 }
-        .filter { println("  ivrig filter $it"); it > 4 }
-    println("Ivrig resultat: $eagerResult\n")
+    println("=== Eager (List) — mellomliggende lister ===")
+    val eager = listOf(1, 2, 3, 4, 5)
+        .map { println("  eager map $it"); it * 2 }
+        .filter { println("  eager filter $it"); it > 4 }
+    println("  Resultat: $eager")
 
-    // Lazy (Sequence) — prosesserer element for element
-    val lazyResult = listOf(1, 2, 3, 4, 5)
+    println("\n=== Lazy (Sequence) — element for element ===")
+    val lazy = listOf(1, 2, 3, 4, 5)
         .asSequence()
-        .map { println("  lat map $it"); it * 2 }
-        .filter { println("  lat filter $it"); it > 4 }
+        .map { println("  lazy map $it"); it * 2 }
+        .filter { println("  lazy filter $it"); it > 4 }
         .toList()  // terminal operasjon — trigger evaluering
-    println("Lazy result: $lazyResult\n")
+    println("  Resultat: $lazy")
 
-    // sequenceOf
+    println("\n=== sequenceOf + terminal ===")
     val seq = sequenceOf(1, 2, 3)
-    println("sequenceOf sum: ${seq.sum()}")
+    println("  sum: ${seq.sum()}")
 
-    // generateSequence — uendelig sekvens
-    val powers = generateSequence(1) { it * 2 }  // 1, 2, 4, 8, 16...
-    println("Første 10 potenser av 2: ${powers.take(10).toList()}")
+    println("\n=== generateSequence — uendelig sekvens ===")
+    val toerpotenser = generateSequence(1) { it * 2 }  // 1, 2, 4, 8, 16…
+    println("  Første 10: ${toerpotenser.take(10).toList()}")
 
-    // generateSequence med null-terminering
-    val countDown = generateSequence(10) { if (it > 0) it - 1 else null }
-    println("Nedtelling: ${countDown.toList()}")
+    println("\n=== generateSequence med null-terminering ===")
+    val nedtelling = generateSequence(10) { if (it > 0) it - 1 else null }
+    println("  ${nedtelling.toList()}")
 
-    // Fibonacci med generateSequence
-    val fibonacci = generateSequence(Pair(0, 1)) { Pair(it.second, it.first + it.second) }
+    println("\n=== Fibonacci med generateSequence ===")
+    val fib = generateSequence(Pair(0, 1)) { Pair(it.second, it.first + it.second) }
         .map { it.first }
-    println("Fibonacci(10): ${fibonacci.take(10).toList()}")
+    println("  Første 10: ${fib.take(10).toList()}")
 
-    // Ytelsesforsksell: sequence unngår mellomliggende lister
-    val largeRange = (1..1_000_000)
-    val firstBigSquare = largeRange.asSequence()
+    println("\n=== Ytelsesforskjell: stopp tidlig uten å lage mellomliste ===")
+    val stort = 1..1_000_000
+    val førsteStoreKvadrat = stort.asSequence()
         .map { it.toLong() * it }
-        .first { it > 1_000_000 }  // stopper etter den finner en
-    println("Første kvadrat > 1M: $firstBigSquare")
+        .first { it > 1_000_000 }
+    println("  Første kvadrat > 1M: $førsteStoreKvadrat")
 }
-
