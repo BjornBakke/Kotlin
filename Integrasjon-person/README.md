@@ -26,7 +26,10 @@ mvn spring-boot:run
 Når applikasjonen kjører, åpne nettleseren eller bruk curl:
 
 ```bash
-curl http://localhost:8080/api/
+curl "http://localhost:8080/api/?term=bjørn"
 ```
 
-Dette returnerer en liste med personer i JSON-format.
+`term` er obligatorisk. Søket bruker case-insensitiv delstrengsmatching på navn
+og delstrengsmatching på fødselsnummer. Et tomt søk gir en tom liste.
+
+Eksemplet returnerer alle personer som har `bjørn` i navnet, i JSON-format.

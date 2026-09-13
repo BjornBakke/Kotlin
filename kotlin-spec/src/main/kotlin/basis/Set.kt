@@ -29,10 +29,10 @@ fun main() {
     println("Inneholder 'banan'? ${"banan" in kunLesFrukt}")
 
     frukt.add("dragefrukt")
-    println("Etter add: $frukt")
+    println("Etter kall til add: $frukt")
 
     frukt.remove("dragefrukt")
-    println("Etter remove: $frukt")
+    println("Etter kall til remove: $frukt")
 
     // Typisk bruk: allowliste
     val støttet = setOf("HTTP", "HTTPS", "FTP")
