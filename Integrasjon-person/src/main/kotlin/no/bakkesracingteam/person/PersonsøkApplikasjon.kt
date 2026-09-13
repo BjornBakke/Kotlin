@@ -1,4 +1,4 @@
-package no.bakkesracingteram.person
+package no.bakkesracingteam.person
 
 import org.springframework.boot.autoconfigure.SpringBootApplication
 import org.springframework.boot.runApplication
@@ -9,4 +9,3 @@ class PersonsøkApplikasjon
 fun main(args: Array<String>) {
     runApplication<PersonsøkApplikasjon>(*args)
 }
-

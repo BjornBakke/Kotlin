@@ -38,10 +38,10 @@ fun main() {
 
     // Legg til og fjern
     meny["kokosnøtt"] = 150
-    println("Etter add: $meny")
+    println("Etter innsetting: $meny")
 
     meny.remove("appelsin")
-    println("Etter remove: $meny")
+    println("Etter kall til remove: $meny")
 
     // Inspeksjon
     println("Antall par: ${jusMeny.count()}")

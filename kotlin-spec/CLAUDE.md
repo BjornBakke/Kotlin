@@ -18,7 +18,7 @@ Run all commands from `kotlin-spec/`:
 
 ```bash
 mvn compile                          # Compile only
-mvn compile exec:java                # Run basis.MainKt
+mvn compile exec:java                # Run org.example.basis.MainKt
 mvn test                             # Run smoke tests (JUnit 5)
 mvn test -Dtest=BasisMainSmokeTest   # Run a single smoke test class
 ```
@@ -29,7 +29,7 @@ be run from IntelliJ (green arrow at `main()`).
 ## Technical Details
 
 - **Kotlin 2.3.20** with JVM target 25
-- **Main class**: `basis.MainKt` (configured in `exec-maven-plugin`)
+- **Main class**: `org.example.basis.MainKt` (configured in `exec-maven-plugin`)
 - Each source file has its own `main()` function for standalone execution
 - No cross-file imports — every file is self-contained
 - All packages use `package org.example.<package>` (all lowercase, even though

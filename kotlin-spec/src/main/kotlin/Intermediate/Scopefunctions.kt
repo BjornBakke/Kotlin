@@ -3,6 +3,11 @@ package org.example.intermediate
 /**
  * Scope functions — let, apply, run, also, with
  *
+ * Dekker:
+ *  - Forskjellen mellom let, apply, run, also og with
+ *  - Mottakerreferansene this og it
+ *  - Retur av mottakerobjektet eller lambda-resultatet
+ *
  * Kotlin har fem scope-funksjoner som lar deg kjøre en blokk med kode i
  * konteksten av et objekt. De skiller seg på to ting:
  *   1) Hvordan objektet refereres inni blokken (this vs it)
@@ -21,6 +26,12 @@ package org.example.intermediate
  *  - Trenger du et nytt resultat? let / run / with
  *  - Refererer du properties som "this.x"? apply / run / with
  *  - Refererer du objektet med kort navn? let / also
+ *
+ * Bruk når: du vil gruppere operasjoner på et objekt, transformere en
+ * nullable verdi eller tydeliggjøre initialisering og bieffekter.
+ *
+ * NB: Unngå lange kjeder og nøstede scope-funksjoner; this og it kan raskt
+ *     bli uklare og gjøre koden vanskeligere å lese.
  *
  * Docs: https://kotlinlang.org/docs/scope-functions.html
  */
@@ -50,7 +61,7 @@ fun main() {
     val tall = mutableListOf(1, 2, 3)
         .also { println("  Før: $it") }
         .apply { add(4) }
-        .also { println("  Etter add: $it") }
+        .also { println("  Etter kall til add: $it") }
     println("  Resultat: $tall")
 
     println("\n=== run: initialiser + returner et resultat ===")

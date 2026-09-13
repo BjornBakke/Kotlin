@@ -37,10 +37,10 @@ fun main() {
 
     // Legg til og fjern
     former.add("femkant")
-    println("Etter add: $former")
+    println("Etter kall til add: $former")
 
     former.remove("femkant")
-    println("Etter remove: $former")
+    println("Etter kall til remove: $former")
 
     // formerLest reflekterer endringer på underliggende liste (samme objekt)
     println("formerLest ser også samme endringer: $formerLest")

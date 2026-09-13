@@ -14,7 +14,7 @@ Kjør kommandoer fra `kotlin-spec/`.
 - `mvn compile`: kompilerer Kotlin-kilder.
 - `mvn test`: kjører smoke-testene (hver `main()` kalles via refleksjon).
 - `mvn clean test`: sletter gamle artefakter og kjører en ren testrunde.
-- `mvn exec:java`: kjører konfigurert main-klasse (`basis.MainKt`).
+- `mvn exec:java`: kjører konfigurert main-klasse (`org.example.basis.MainKt`).
 
 Eksempel:
 ```powershell

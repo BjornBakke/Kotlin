@@ -69,7 +69,7 @@ pom.xml
 ## Krav
 
 - Git
-- JDK 21 eller nyere (Maven er konfigurert til å bruke `jvmTarget = 25`)
+- JDK 25 (Maven er konfigurert til å bruke `jvmTarget = 25`)
 - Maven 3.9+
 
 Sjekk versjoner:
@@ -179,7 +179,7 @@ Kjør en enkelt fil i IntelliJ ved å trykke på grønn pil ved siden av `fun ma
 - `mvn compile` — kompilerer kildene
 - `mvn test` — kjører smoke-testene (hver `main()` kalles)
 - `mvn clean test` — ren testrunde
-- `mvn exec:java` — kjører konfigurert `mainClass` (`basis.MainKt`)
+- `mvn exec:java` — kjører konfigurert `mainClass` (`org.example.basis.MainKt`)
 
 ## Kodestandard
 

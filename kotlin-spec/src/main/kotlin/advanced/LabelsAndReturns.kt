@@ -5,7 +5,7 @@ package org.example.advanced
  *
  * Dekker:
  *  - return@lambdaName for å returnere fra en lambda (ikke ytre funksjon)
- *  - Custom labels (myLoop@)
+ *  - Egendefinerte labels (myLoop@)
  *  - break@ og continue@ i nøstede løkker
  *  - return@run, return@let
  *
@@ -26,7 +26,7 @@ fun main() {
     }
     println("  Etter forEach")
 
-    println("\n=== Custom label ===")
+    println("\n=== Egendefinert label ===")
     listOf(1, 2, 3, 4, 5).forEach myLoop@{
         if (it == 3) return@myLoop
         println("  $it")

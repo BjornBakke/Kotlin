@@ -13,6 +13,9 @@ package org.example.basis
  * Alle andre filer i dette prosjektet har også sin egen main(), slik at
  * hver fil kan kjøres selvstendig.
  *
+ * NB: val kan ikke tilordnes på nytt. Bruk var bare når verdien faktisk
+ *     må endres.
+ *
  * Docs: https://kotlinlang.org/docs/basic-syntax.html
  */
 

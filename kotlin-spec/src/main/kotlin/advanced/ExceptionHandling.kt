@@ -7,7 +7,7 @@ package org.example.advanced
  *  - try-catch-finally
  *  - try som uttrykk (returnerer verdi)
  *  - Flere catch-blokker for ulike exceptions
- *  - Custom exception (arver Exception)
+ *  - Egendefinert exception (arver Exception)
  *  - throw som uttrykk, Nothing-type
  *
  * Bruk når: du må håndtere feil fra IO, parsing, eller egen validering.
@@ -63,7 +63,7 @@ fun main() {
     println("  ${risikabelOp("abc")}")
     println("  ${risikabelOp("99")}")
 
-    println("\n=== Custom exception ===")
+    println("\n=== Egendefinert exception ===")
     fun valider(alder: Int) {
         if (alder < 0 || alder > 150) {
             throw ValideringsException("alder", "Alder må være 0-150, fikk $alder")
